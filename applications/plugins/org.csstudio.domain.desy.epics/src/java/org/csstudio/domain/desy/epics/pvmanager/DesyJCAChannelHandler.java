@@ -27,8 +27,6 @@ import javax.annotation.Nonnull;
 
 import org.csstudio.domain.desy.epics.time.DesyDbrTimeValidator;
 import org.csstudio.domain.desy.epics.types.EpicsMetaData;
-import org.epics.pvmanager.jca.JCAChannelHandler;
-import org.epics.pvmanager.jca.JCADataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +39,7 @@ import com.google.common.base.Predicate;
  * @author bknerr
  * @since 30.08.2011
  */
-public class DesyJCAChannelHandler extends JCAChannelHandler {
+public class DesyJCAChannelHandler extends _DesyJCAChannelHandler {
 
     // TODO (2012-10-26 jp adapted to new pvmanager) massive changes, removed nearly everything
 
@@ -56,7 +54,7 @@ public class DesyJCAChannelHandler extends JCAChannelHandler {
      * @param dataType
      */
     public DesyJCAChannelHandler(@Nonnull final String channelName,
-                                 @Nonnull final JCADataSource dataSource) {
+                                 @Nonnull final DesyJCADataSource dataSource) {
         // TODO (2012-10-26 jp adapted to new pvmanager)
         super(channelName, dataSource);
         _validator = new DesyDbrTimeValidator();

@@ -21,11 +21,14 @@
  */
 package org.csstudio.domain.desy.epics.pvmanager;
 
+import gov.aps.jca.Context;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import org.epics.pvmanager.ChannelHandler;
 import org.epics.pvmanager.jca.JCADataSource;
+
 
 
 /**
@@ -36,19 +39,34 @@ import org.epics.pvmanager.jca.JCADataSource;
  * @since 30.08.2011
  */
 public class DesyJCADataSource extends JCADataSource {
-
+	DesyJCATypeSupport typeSupport;
     public DesyJCADataSource(@Nonnull final String className,
                              final int monitorMask) {
         super(className, monitorMask);
     }
+    /**
+     * Creates a new data source using the given context. The context will
+     * never be closed. The type mapping con be configured with a custom
+     * type support.
+     *
+     * @param jcaContext the context to be used
+     * @param monitorMask Monitor.VALUE, ...
+     * @param typeSupport type support to be used
+     */
+    public DesyJCADataSource(final Context jcaContext, final int monitorMask, final DesyJCATypeSupport typeSupport) {
 
+    	super(jcaContext, monitorMask);
+    	this.typeSupport=typeSupport;
+    }
     @Override
     @Nonnull
     protected ChannelHandler createChannel(@Nonnull final String channelName) {
         // TODO (2012-10-26 jp adapted to new pvmanager)
         return new DesyJCAChannelHandler(channelName, this);
     }
-
+    DesyJCATypeSupport getTypeSupport() {
+        return typeSupport;
+    }
     @CheckForNull
     public DesyJCAChannelHandler getHandler(@Nonnull final String channelName) {
         return (DesyJCAChannelHandler) getChannels().get(channelName);
