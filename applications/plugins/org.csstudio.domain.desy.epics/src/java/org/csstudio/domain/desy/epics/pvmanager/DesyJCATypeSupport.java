@@ -12,26 +12,24 @@ import gov.aps.jca.Channel;
 
 import org.epics.pvmanager.DataSourceTypeSupport;
 import org.epics.pvmanager.ValueCache;
-import org.epics.pvmanager.jca.JCATypeAdapter;
-import org.epics.pvmanager.jca.JCATypeAdapterSet;
 
 /**
  *
- * Given a set of {@link JCATypeAdapter} prepares type support for the
+ * Given a set of {@link DesyJCATypeAdapter} prepares type support for the
  * JCA data source.
  *
  * @author carcassi
  */
 public class DesyJCATypeSupport extends DataSourceTypeSupport {
 
-    private final JCATypeAdapterSet adapters;
+    private final DesyJCATypeAdapterSet adapters;
 
     /**
      * A new type support for the jca type support.
      *
      * @param adapters a set of jca adapters
      */
-    public DesyJCATypeSupport(final JCATypeAdapterSet adapters) {
+    public DesyJCATypeSupport(final DesyJCATypeAdapterSet adapters) {
         this.adapters = adapters;
     }
 
@@ -43,7 +41,7 @@ public class DesyJCATypeSupport extends DataSourceTypeSupport {
      * @param channel the jca channel
      * @return the matched type adapter
      */
-    protected JCATypeAdapter find(final ValueCache<?> cache, final Channel channel) {
+    protected DesyJCATypeAdapter find(final ValueCache<?> cache, final Channel channel) {
         return find(adapters.getAdapters(), cache, channel);
     }
 

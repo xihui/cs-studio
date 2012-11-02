@@ -7,6 +7,8 @@
  ******************************************************************************/
 package org.csstudio.archive.common.engine.httpserver;
 
+import gov.aps.jca.Channel.ConnectionState;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -117,11 +119,24 @@ class MainResponse extends AbstractResponse {
     private void createChannelStatsRows(@Nonnull final HTMLWriter html) {
         int numOfChannels = 0;
         int numOfConnectedChannels = 0;
+        int numOfStartedChannels = 0;
+        int numOfConnectedStateChannels = 0;
+        int numOfDisconnectedStateChannels = 0;
+        int numOfNeverConnectedStateChannels = 0;
+        int numOfClosedStateChannels = 0;
+        int numOfUnknownStateChannels = 0;
         for (final ArchiveGroup group : getModel().getGroups()) {
             numOfChannels += group.getChannels().size();
 
             for (final ArchiveChannelBuffer<?, ?> channel : group.getChannels()) {
                 numOfConnectedChannels += channel.isConnected() ? 1 : 0;
+                numOfStartedChannels += channel.isStarted()?1:0;
+                numOfConnectedStateChannels += ConnectionState.CONNECTED.equals(channel.getConnectState()) ? 1:0;
+                numOfDisconnectedStateChannels += ConnectionState.DISCONNECTED.equals(channel.getConnectState())? 1:0;
+                numOfNeverConnectedStateChannels += ConnectionState.NEVER_CONNECTED.equals(channel.getConnectState())? 1:0;
+                numOfClosedStateChannels += ConnectionState.CLOSED.equals(channel.getConnectState())? 1:0;
+                numOfUnknownStateChannels += channel.getConnectState()==null ? 1:0;
+
             }
         }
         html.tableLine(new String[] {numOf(Messages.HTTP_COLUMN_GROUPCOUNT),
@@ -130,12 +145,44 @@ class MainResponse extends AbstractResponse {
         html.tableLine(new String[] {numOf(Messages.HTTP_COLUMN_CHANNELS),
                                      String.valueOf(numOfChannels),
                                      });
+        if (numOfStartedChannels > 0) {
+            html.tableLine(new String[] {numOf(Messages.HTTP_START_CHANNEL),
+                    numOfStartedChannels==numOfChannels?  String.valueOf(numOfStartedChannels): HTMLWriter.makeRedText(String.valueOf(numOfStartedChannels)),
+                                         });
+        }
         final int numOfDisconnectedChannels = numOfChannels - numOfConnectedChannels;
         if (numOfDisconnectedChannels > 0) {
             html.tableLine(new String[] {numOf(Messages.HTTP_NOT_CONNECTED),
                                          HTMLWriter.makeRedText(String.valueOf(numOfDisconnectedChannels)),
                                          });
         }
+        if (numOfConnectedStateChannels > 0) {
+            html.tableLine(new String[] {numOf(Messages.HTTP_CONNECTED_CHANNEL_STATE),
+                                         HTMLWriter.makeRedText(String.valueOf(numOfConnectedStateChannels)),
+                                         });
+        }
+        if (numOfDisconnectedStateChannels > 0) {
+            html.tableLine(new String[] {numOf(Messages.HTTP_DISCONNECTED_CHANNEL),
+                                         HTMLWriter.makeRedText(String.valueOf(numOfDisconnectedStateChannels)),
+                                         });
+        }
+        if (numOfNeverConnectedStateChannels > 0) {
+            html.tableLine(new String[] {numOf(Messages.HTTP_NEVERCONNECTED_CHANNEL),
+                                         HTMLWriter.makeRedText(String.valueOf(numOfNeverConnectedStateChannels)),
+                                         });
+        }
+        if (numOfClosedStateChannels> 0) {
+            html.tableLine(new String[] {numOf(Messages.HTTP_CLOSED_CHANNEL),
+                                         HTMLWriter.makeRedText(String.valueOf(numOfClosedStateChannels)),
+                                         });
+        }
+
+        if (numOfUnknownStateChannels > 0) {
+            html.tableLine(new String[] {numOf(Messages.HTTP_UNKNOWN_CHANNEL),
+                                         HTMLWriter.makeRedText(String.valueOf(numOfUnknownStateChannels)),
+                                         });
+        }
+
     }
 
     private void createWriteStatsRows(@Nonnull final HTMLWriter html) {
@@ -145,8 +192,8 @@ class MainResponse extends AbstractResponse {
 
         final TimeInstant lastWriteTime = getModel().getLastWriteTime();
         html.tableLine(new String[] {Messages.HTTP_LAST_WRITETIME,
-                                     (lastWriteTime == null ? Messages.HTTP_NEVER :
-                                                              lastWriteTime.formatted()),
+                                     lastWriteTime == null ? Messages.HTTP_NEVER :
+                                                              lastWriteTime.formatted(),
                                                               });
 
         final Double avgWriteCount = getModel().getAvgWriteCount();

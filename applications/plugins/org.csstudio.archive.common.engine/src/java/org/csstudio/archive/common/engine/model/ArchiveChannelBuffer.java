@@ -10,6 +10,7 @@ package org.csstudio.archive.common.engine.model;
 import static org.epics.pvmanager.ExpressionLanguage.channel;
 import static org.epics.pvmanager.ExpressionLanguage.newValuesOf;
 import static org.epics.pvmanager.util.TimeDuration.ms;
+import gov.aps.jca.Channel.ConnectionState;
 
 import java.io.Serializable;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.csstudio.archive.common.service.IArchiveEngineFacade;
 import org.csstudio.archive.common.service.channel.ArchiveChannelId;
 import org.csstudio.archive.common.service.channel.IArchiveChannel;
 import org.csstudio.archive.common.service.sample.IArchiveSample;
+import org.csstudio.domain.desy.epics.pvmanager.DesyJCAChannelHandler;
 import org.csstudio.domain.desy.epics.pvmanager.DesyJCADataSource;
 import org.csstudio.domain.desy.service.osgi.OsgiServiceUnavailableException;
 import org.csstudio.domain.desy.system.ISystemVariable;
@@ -187,8 +189,8 @@ public class ArchiveChannelBuffer<V extends Serializable, T extends ISystemVaria
         if (_pv != null) {
             _pv.close();
         }
-        _pv = PVManager.read(newValuesOf(channel(_name))).every(RATE);
 
+        _pv = PVManager.read(newValuesOf(channel(_name))).every(RATE);
         _listener = new DesyArchivePVManagerListener(this, _pv, _provider, _name, _id, _datatype) {
             @SuppressWarnings("synthetic-access")
             @Override
@@ -196,6 +198,9 @@ public class ArchiveChannelBuffer<V extends Serializable, T extends ISystemVaria
                 synchronized (this) {
                     _receivedSampleCount++;
                     _mostRecentSysVar = (T) sample.getSystemVariable();
+                 /*   if(_name.startsWith("G47c:K:K")) {
+                        System.out.println(_name+ "    ArchiveChannelBuffer.initPvAndListener()  " +sample.getValue());
+                    }*/
                 }
                 return _buffer.add(sample);
 
@@ -204,8 +209,7 @@ public class ArchiveChannelBuffer<V extends Serializable, T extends ISystemVaria
         _listener.setStartInfo(info);
         _pv.addPVReaderListener(_listener);
     }
-
-    public void enable() throws EngineModelException {
+   public void enable() throws EngineModelException {
         synchronized (this) {
             if (isEnabled()) {
                 return;
@@ -230,6 +234,22 @@ public class ArchiveChannelBuffer<V extends Serializable, T extends ISystemVaria
         } catch (final ArchiveServiceException e) {
             throw new EngineModelException("Internal service error on handling channel connection info.", e);
         }
+    }
+    public boolean isChannelConnected() throws EngineModelException {
+        boolean isConn=false;
+        try {
+            final IArchiveEngineFacade service = _provider.getEngineFacade();
+            isConn= service.getLatestChannelStatusById(getId()).isConnected();
+        } catch (final OsgiServiceUnavailableException e) {
+
+            throw new EngineModelException("Service unavailable to handle channel connection info.", e);
+
+        } catch (final ArchiveServiceException e) {
+
+            throw new EngineModelException("Internal service error on handling channel connection info.", e);
+
+        }
+        return isConn;
     }
     /**
      * Stop archiving this channel
@@ -303,4 +323,20 @@ public class ArchiveChannelBuffer<V extends Serializable, T extends ISystemVaria
     public boolean isEnabled() {
         return _isEnabled;
     }
+    public ConnectionState getConnectState(){
+          try{
+            final DesyJCAChannelHandler channelHandler = (DesyJCAChannelHandler)_source.getChannels().get(_name);
+            return channelHandler.getConnectState();
+          }catch(final NullPointerException e){
+            return null;
+          }
+    }
+    public ConnectionState getCAJDirectConnectState(){
+        try{
+          final DesyJCAChannelHandler channelHandler = (DesyJCAChannelHandler)_source.getChannels().get(_name);
+          return channelHandler.getCAJDirectConnectState();
+        }catch(final NullPointerException e){
+          return null;
+        }
+  }
 }

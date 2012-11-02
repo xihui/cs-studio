@@ -31,6 +31,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.csstudio.archive.common.service.ArchiveConnectionException;
 import org.csstudio.archive.common.service.channel.ArchiveChannelId;
 import org.csstudio.archive.common.service.channelstatus.ArchiveChannelStatus;
 import org.csstudio.archive.common.service.channelstatus.ArchiveChannelStatusId;
@@ -63,6 +64,10 @@ public class ArchiveChannelStatusDaoImpl extends AbstractArchiveDao implements I
         "SELECT id, channel_id, connected, info, time FROM " +
         getDatabaseName() + "." + TAB +
         " WHERE channel_id=? AND time BETWEEN ? AND ? ORDER BY time DESC LIMIT 1";
+    private final String _selectLatestChannelStatusStmtWithNoneTime =
+            "SELECT id, channel_id, connected, info, time FROM " +
+            getDatabaseName() + "." + TAB +
+            " WHERE channel_id=? ORDER BY time DESC LIMIT 1";
     private final String _deleteFromChannelStatusStmt =
         "DELETE FROM " + getDatabaseName() + "." + TAB + " WHERE channel_id=?";
 
@@ -162,5 +167,39 @@ public class ArchiveChannelStatusDaoImpl extends AbstractArchiveDao implements I
             closeSqlResources(null, stmt, conn, _selectLatestChannelStatusStmt);
         }
         return DeleteResult.failed("Channel status removal failed for id '" + id.intValue() + "'");
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Nonnull
+    public IArchiveChannelStatus retrieveLatestStatusByChannelId(@Nonnull final ArchiveChannelId id) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+            try {
+                conn = createConnection();
+
+                stmt = conn.prepareStatement(_selectLatestChannelStatusStmtWithNoneTime);
+
+                stmt.setInt(1, id.intValue());
+
+                rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                      return  createChannelStatusFromResult(rs);
+                    }
+                }catch (final ArchiveConnectionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (final SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+        return null;
     }
 }

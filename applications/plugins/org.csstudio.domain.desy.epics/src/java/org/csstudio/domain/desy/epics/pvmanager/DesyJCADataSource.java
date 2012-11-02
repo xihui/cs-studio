@@ -21,7 +21,12 @@
  */
 package org.csstudio.domain.desy.epics.pvmanager;
 
+import gov.aps.jca.CAException;
 import gov.aps.jca.Context;
+import gov.aps.jca.JCALibrary;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -39,10 +44,34 @@ import org.epics.pvmanager.jca.JCADataSource;
  * @since 30.08.2011
  */
 public class DesyJCADataSource extends JCADataSource {
+
+    private static final Logger log = Logger.getLogger(JCADataSource.class.getName());
+
 	DesyJCATypeSupport typeSupport;
     public DesyJCADataSource(@Nonnull final String className,
                              final int monitorMask) {
-        super(className, monitorMask);
+    	 this(createContext(className), monitorMask);
+
+    }
+
+    /**
+     * Creates a new data source using the given context. The context will
+     * never be closed.
+     *
+     * @param jcaContext the context to be used
+     * @param monitorMask Monitor.VALUE, ...
+     */
+    public DesyJCADataSource(final Context jcaContext, final int monitorMask) {
+        this(jcaContext, monitorMask, new DesyJCATypeSupport(new DesyJCAVTypeAdapterSet()));
+    }
+    private static Context createContext(final String className) {
+        try {
+            final JCALibrary jca = JCALibrary.getInstance();
+            return jca.createContext(className);
+        } catch (final CAException ex) {
+            log.log(Level.SEVERE, "JCA context creation failed", ex);
+            throw new RuntimeException("JCA context creation failed", ex);
+        }
     }
     /**
      * Creates a new data source using the given context. The context will
@@ -55,14 +84,12 @@ public class DesyJCADataSource extends JCADataSource {
      */
     public DesyJCADataSource(final Context jcaContext, final int monitorMask, final DesyJCATypeSupport typeSupport) {
 
-    	super(jcaContext, monitorMask);
-    	this.typeSupport=typeSupport;
+      	this.typeSupport=typeSupport;
     }
     @Override
     @Nonnull
     protected ChannelHandler createChannel(@Nonnull final String channelName) {
-        // TODO (2012-10-26 jp adapted to new pvmanager)
-        return new DesyJCAChannelHandler(channelName, this);
+           return new DesyJCAChannelHandler(channelName, this);
     }
     DesyJCATypeSupport getTypeSupport() {
         return typeSupport;

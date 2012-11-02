@@ -158,10 +158,10 @@ public class ArchiveEngineApplication implements IApplication {
             public Notification<EpicsSystemVariable> prepareNotification(@CheckForNull final EpicsSystemVariable oldValue,
                                                                          @CheckForNull final EpicsSystemVariable newValue) {
                 if (oldValue != null && newValue != null) {
-                    if (!oldValue.getData().equals(newValue.getData())) {
+                   /* if (!oldValue.getData().equals(newValue.getData())) {
                         return new Notification<EpicsSystemVariable>(true, newValue);
-                    }
-                    return new Notification<EpicsSystemVariable>(false, newValue);
+                    }*/
+                    return new Notification<EpicsSystemVariable>(true, newValue);
                 } else if (oldValue == null && newValue == null) {
                     return new Notification<EpicsSystemVariable>(false, null);
                 }

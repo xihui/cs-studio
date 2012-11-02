@@ -136,4 +136,4 @@ public interface IArchiveReaderFacade {
     @Nonnull
     Collection<String> getChannelsByNamePattern(@Nonnull final Pattern pattern)
                                                 throws ArchiveServiceException;
-}
+   }

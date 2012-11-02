@@ -7,6 +7,8 @@
  ******************************************************************************/
 package org.csstudio.archive.common.engine.httpserver;
 
+import gov.aps.jca.Channel.ConnectionState;
+
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -96,10 +98,15 @@ class ShowGroupResponse extends AbstractGroupResponse {
     private void createChannelsTable(@Nonnull final ArchiveGroup group,
                                      @Nonnull final HTMLWriter html) {
         // HTML Table of all channels in the group
+        String errorChannels="";
         html.openTable(1, new String[] {
+                "#",
             Messages.HTTP_CHANNEL,
             Messages.HTTP_STARTED,
             Messages.HTTP_CONNECTED,
+            Messages.HTTP_CONN_STATE,
+            "CAJ direct",
+            "DB direct",
             Messages.HTTP_CURRENT_VALUE,
             Messages.HTTP_TIMESTAMP,
             Messages.HTTP_COLUMN_RECEIVEDVALUES,
@@ -107,9 +114,10 @@ class ShowGroupResponse extends AbstractGroupResponse {
             Messages.HTTP_COLUMN_QUEUEAVG,
             Messages.HTTP_COLUMN_QUEUEMAX,
         });
+        int number=0;
         for (final ArchiveChannelBuffer<?, ?> channel : group.getChannels()) {
             try {
-
+                number++;
                 final String started = channel.isStarted() ? Messages.HTTP_YES :
                                                              HTMLWriter.makeRedText(Messages.HTTP_NO);
                 final String connected = channel.isConnected() ? Messages.HTTP_YES :
@@ -117,7 +125,18 @@ class ShowGroupResponse extends AbstractGroupResponse {
                 final SampleBuffer<?, ?, ?> buffer = channel.getSampleBuffer();
                 final SampleBufferStatistics stats = buffer.getBufferStats();
                 final ISystemVariable<?> mostRecentSample = channel.getMostRecentSample();
-
+                final ConnectionState state=channel.getConnectState();
+                final String connState = state!=null? ConnectionState.CONNECTED.equals(state)?   state.getName() : HTMLWriter.makeRedText( state.getName()): HTMLWriter.makeRedText("UNKNOWN");
+                final String cajDirectconnState ;
+                final String isChannelConnected ;
+                if( state!=null){
+                cajDirectconnState = ConnectionState.CONNECTED.equals(state) && channel.isConnected()?   state.getName() : !ConnectionState.CONNECTED.equals(state) && !channel.isConnected() ?  HTMLWriter.makeRedText(  state.getName()) : HTMLWriter.makeRedText( channel.getCAJDirectConnectState().getName());
+                isChannelConnected = ConnectionState.CONNECTED.equals(state) && channel.isConnected()?   Messages.HTTP_YES  : !ConnectionState.CONNECTED.equals(state) && !channel.isConnected() ?  HTMLWriter.makeRedText(  Messages.HTTP_NO) : channel.isChannelConnected() ? Messages.HTTP_YES :
+                    HTMLWriter.makeRedText(Messages.HTTP_NO);;
+                 }else{
+                    cajDirectconnState=HTMLWriter.makeRedText("UNKNOWN");
+                    isChannelConnected=HTMLWriter.makeRedText("UNKNOWN");
+                }
                 final String curVal = limitLength(getValueAsString(mostRecentSample), MAX_VALUE_DISPLAY);
 
                 final String curValTimestamp =
@@ -125,9 +144,13 @@ class ShowGroupResponse extends AbstractGroupResponse {
                         "null";
 
                     html.tableLine(new String[] {
+                            Integer.toString(number),
                             ShowChannelResponse.linkTo(channel.getName()),
                             started,
                             connected,
+                            connState,
+                            cajDirectconnState,
+                            isChannelConnected,
                             curVal,
                             curValTimestamp,
                             Long.toString(channel.getReceivedValues()),
@@ -136,10 +159,14 @@ class ShowGroupResponse extends AbstractGroupResponse {
                             Integer.toString(stats.getMaxSize()),
                     });
             } catch (final Throwable t) {
+                errorChannels+=channel.getName()+"    \n ";
                 System.out.println(channel.getName());
             }
         }
         html.closeTable();
+        if(!errorChannels.isEmpty()) {
+            html.text( HTMLWriter.makeRedText("Error Channel: \n" +errorChannels));
+        }
     }
 
     @Nonnull

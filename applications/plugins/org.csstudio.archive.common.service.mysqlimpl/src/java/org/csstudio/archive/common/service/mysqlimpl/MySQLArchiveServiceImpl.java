@@ -207,7 +207,15 @@ public class MySQLArchiveServiceImpl implements IArchiveEngineFacade, IArchiveRe
                                                                  throws ArchiveServiceException {
         return _retrievalSupport.retrieveLatestEngineStatusInformation(id, latestAliveTime);
     }
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @CheckForNull
+    public IArchiveChannelStatus getLatestChannelStatusById(@Nonnull final ArchiveChannelId id)
+                                                                 throws ArchiveServiceException {
+        return _retrievalSupport.retrieveLatestChannelStatusById(id);
+    }
     /**
      * {@inheritDoc}
      */

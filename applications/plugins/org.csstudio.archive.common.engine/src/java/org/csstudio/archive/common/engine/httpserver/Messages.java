@@ -52,6 +52,13 @@ public final class Messages {
     public static final String HTTP_START = "Start";
     public static final String HTTP_STARTED = "Started";
     public static final String HTTP_START_CHANNEL = "Start Channel";
+    public static final String HTTP_CONECTED_CHANNEL = "connected Channel";
+    public static final String HTTP_CONNECTED_CHANNEL_STATE = " Channel with connected State";
+    public static final String HTTP_DISCONNECTED_CHANNEL = "Channel with disconnected State";
+    public static final String HTTP_NEVERCONNECTED_CHANNEL = "Channel with neverconnected State";
+    public static final String HTTP_CLOSED_CHANNEL = "Channel with closed State ";
+    public static final String HTTP_CONN_STATE = "Conn. State";
+    public static final String HTTP_UNKNOWN_CHANNEL="Unknown state";
     public static final String HTTP_START_GROUP = "Start Group";
     public static final String HTTP_STARTTIME = "Start Time (UTC)";
     public static final String HTTP_STATE = "EngineState";

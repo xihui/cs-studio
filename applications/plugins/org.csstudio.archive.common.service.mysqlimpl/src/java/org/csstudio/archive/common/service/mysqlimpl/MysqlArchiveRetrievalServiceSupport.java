@@ -259,5 +259,13 @@ public class MysqlArchiveRetrievalServiceSupport {
             throw new ArchiveServiceException("Channel retrieval failed.", ade);
         }
     }
+    @Nonnull
+    /**
+     * @param id
+     * @return
+     */
+    public IArchiveChannelStatus retrieveLatestChannelStatusById(final ArchiveChannelId id) {
+        return _channelStatusDao.retrieveLatestStatusByChannelId(id);
+    }
 
 }

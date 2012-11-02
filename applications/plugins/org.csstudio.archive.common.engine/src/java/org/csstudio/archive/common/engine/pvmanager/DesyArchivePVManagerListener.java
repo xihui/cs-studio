@@ -114,17 +114,15 @@ public abstract class DesyArchivePVManagerListener<V extends Serializable,
                 _isConnected = _buffer.isConnected();
                 _firstConnection = false;
             }
-            //test connectionsstatus of the Channel
+            //connectionsstate of the Channel
             if (!_firstConnection && _isConnected != _buffer.isConnected()) {
+
                 _isConnected = _buffer.isConnected();
                 handleOnConnectionInformation(_provider,
                                               sysVars.get(0),
                                               _channelId,
                                               _isConnected,
                                               _startInfo);
-                _buffer.start(_startInfo);
-                _buffer.persistChannelStatusInfo(_channelId, _isConnected, _startInfo);
-
             }
             for (final EpicsSystemVariable sysVar : sysVars) {
                 handleValueUpdateInformation(sysVar);

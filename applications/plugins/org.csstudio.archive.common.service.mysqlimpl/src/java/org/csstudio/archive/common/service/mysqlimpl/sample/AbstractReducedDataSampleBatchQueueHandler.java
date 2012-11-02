@@ -77,14 +77,17 @@ public abstract class AbstractReducedDataSampleBatchQueueHandler<T extends Abstr
     @Override
     protected void fillStatement(@Nonnull final PreparedStatement stmt,
                                  @Nonnull final T element)
-                                 throws ArchiveDaoException,
-                                        SQLException {
+                                 throws ArchiveDaoException{
+        try{
         stmt.setInt(1, element.getChannelId().intValue());
         stmt.setLong(2, element.getTimestamp().getNanos());
 
-        stmt.setDouble(3, element.getAvg());
-        stmt.setDouble(4, element.getMin());
-        stmt.setDouble(5, element.getMax());
+        stmt.setString(3, element.getAvg().toString());
+        stmt.setString(4, element.getMin().toString());
+        stmt.setString(5, element.getMax().toString());
+        }catch(final SQLException e){
+            throw new ArchiveDaoException("Filling or adding of batch to prepared statement failed for " + element.getChannelId()+ element.getAvg() , e);
+        }
     }
 
     /**
