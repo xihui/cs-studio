@@ -52,6 +52,8 @@ import java.util.regex.Pattern;
 import org.epics.pvmanager.ChannelWriteCallback;
 import org.epics.pvmanager.MultiplexedChannelHandler;
 import org.epics.pvmanager.ValueCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A ChannelHandler for the JCADataSource.
@@ -69,7 +71,7 @@ import org.epics.pvmanager.ValueCache;
  * @author carcassi
  */
 public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, DesyJCAMessagePayload> {
-
+	private static final Logger LOG = LoggerFactory.getLogger(DesyJCAChannelHandler.class);
     private static final int LARGE_ARRAY = 100000;
     private final DesyJCADataSource desyJcaDataSource;
     private volatile Channel channel;
@@ -78,6 +80,7 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
     private boolean putCallback = false;
     private volatile ConnectionState connectionState;
     private boolean isConnected = false;
+    private boolean isFirst = true;
     private final static Pattern hasOptions = Pattern.compile(".* \\{.*\\}");
 
     public DesyJCAChannelHandler(final String channelName, final DesyJCADataSource jcaDataSource) {
@@ -246,6 +249,13 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
                 synchronized(DesyJCAChannelHandler.this) {
                     try {
                     	 isConnected=ev.isConnected();
+                    	 if(channel!=null) {
+                    		 if(isFirst) {
+                    			 isFirst=false;
+							} else {
+								LOG.info("Channel {} is {},",channel.getName(), isConnected? " Connected ": "disconnected");
+							}
+						}
                         // Take the channel from the event so that there is no
                         // synchronization problem
                         final Channel channel = (Channel) ev.getSource();
@@ -315,11 +325,11 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
 
     @Override
     protected boolean isConnected(final Channel channel) {
-        return isChannelConnected(channel);
+      //  return isChannelConnected(channel);
+    	return isConnected;
     }
 
-
-    static boolean isChannelConnected(final Channel channel) {
+   static boolean isChannelConnected(final Channel channel) {
         return channel != null && channel.getConnectionState() == Channel.ConnectionState.CONNECTED;
     }
    public  ConnectionState getConnectState(){
