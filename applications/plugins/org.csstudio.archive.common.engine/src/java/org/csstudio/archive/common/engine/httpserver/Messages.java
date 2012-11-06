@@ -78,6 +78,7 @@ public final class Messages {
     public static final String HTTP_WRITE_PERIOD = "Write Period";
     public static final String HTTP_WRITE_STATE = "Write EngineState";
     public static final String HTTP_YES = "Yes";
+    public static final String HTTP_SUB_TABLETITLE = "Last 10 channel update:";
     /**
      * Constructor.
      */

@@ -59,6 +59,33 @@ public class HTMLWriter {
         text("<div id=\"content\">");
     }
 
+    /** @return HTML Writer with start of HTML page.
+     *  @param resp Response for which to create the writer
+     *  @param title HTML title
+     *  @throws Exception on error
+     */
+    public HTMLWriter(@Nonnull final HttpServletResponse resp,
+                      @Nonnull final String title,final String channelName) throws Exception {
+        resp.setContentType("text/html");
+        html = resp.getWriter();
+        text("<html>");
+        text("<head>");
+        text("<title>" + title + "</title>");
+        text("<script type=\"text/javascript\" src=\"/sorttable.js\"></script>\n");
+        text("<link rel=\"stylesheet\" type=\"text/css\" href=\"/archiver.css\"></link>");
+        text("</head>");
+        text("<body background='" + BACKGROUND + "' onload=\"recusivLoadChannel('"+channelName+"')\">");
+        h1(title);
+
+        text("<div id=\"navigation\">");
+        createNavigationBar(MainResponse.linkTo(),
+                            GroupsResponse.linkTo(),
+                            DisconnectedResponse.linkTo(Messages.HTTP_DISCONNECTED),
+                            HelpResponse.linkTo());
+        text("</div>");
+
+        text("<div id=\"content\">");
+    }
     private void createNavigationBar(@Nonnull final String...navPoints) {
         for (final String nav : navPoints) {
             text("<li>" + nav + "</li>");

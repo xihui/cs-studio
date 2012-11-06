@@ -19,6 +19,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
 
+import org.csstudio.apputil.ringbuffer.RingBuffer;
 import org.csstudio.archive.common.engine.pvmanager.DesyArchivePVManagerListener;
 import org.csstudio.archive.common.engine.service.IServiceProvider;
 import org.csstudio.archive.common.service.ArchiveServiceException;
@@ -70,8 +71,14 @@ public class ArchiveChannelBuffer<V extends Serializable, T extends ISystemVaria
 
     /** Buffer of received samples, periodically written */
     private final SampleBuffer<V, T, IArchiveSample<V, T>> _buffer;
+    private final RingBuffer<IArchiveSample<?,?>> _ringBuffer=new RingBuffer<IArchiveSample<?,?>>(10);
 
-
+    /**
+     * @return the ringBuffer
+     */
+    public RingBuffer<IArchiveSample<?,?>> getRingBuffer() {
+        return _ringBuffer;
+    }
     /** Is this channel currently running?
      *  <p>
      *  PV sends another 'disconnected' event
@@ -202,6 +209,7 @@ public class ArchiveChannelBuffer<V extends Serializable, T extends ISystemVaria
                         System.out.println(_name+ "    ArchiveChannelBuffer.initPvAndListener()  " +sample.getValue());
                     }*/
                 }
+                _ringBuffer.add(sample);
                 return _buffer.add(sample);
 
             }
