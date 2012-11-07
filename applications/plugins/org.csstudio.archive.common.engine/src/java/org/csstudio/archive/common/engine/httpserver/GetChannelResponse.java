@@ -7,6 +7,8 @@
  ******************************************************************************/
 package org.csstudio.archive.common.engine.httpserver;
 
+import gov.aps.jca.Channel.ConnectionState;
+
 import java.io.PrintWriter;
 
 import javax.annotation.Nonnull;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.csstudio.apputil.ringbuffer.RingBuffer;
 import org.csstudio.archive.common.engine.model.ArchiveChannelBuffer;
 import org.csstudio.archive.common.engine.model.EngineModel;
+import org.csstudio.archive.common.engine.model.EngineModelException;
 import org.csstudio.archive.common.engine.model.SampleBuffer;
 import org.csstudio.archive.common.engine.model.SampleBufferStatistics;
 import org.csstudio.archive.common.service.sample.IArchiveSample;
@@ -96,6 +99,7 @@ class GetChannelResponse extends AbstractChannelResponse {
         _html.println(text);
     }
     private void createChannelTable(@Nonnull final ArchiveChannelBuffer<?, ?> channel) {
+        try {
         text("<table>");
         tableLine(new String[] {Messages.HTTP_CHANNEL, channel.getName()});
         tableLine(new String[] {
@@ -106,6 +110,24 @@ class GetChannelResponse extends AbstractChannelResponse {
                         ? Messages.HTTP_YES
                         : HTMLWriter.makeRedText(Messages.HTTP_NO);
         tableLine(new String[] {Messages.HTTP_CONNECTED, connected});
+        final ConnectionState state=channel.getConnectState();
+        final String connState = state!=null? ConnectionState.CONNECTED.equals(state)?   state.getName() : HTMLWriter.makeRedText( state.getName()): HTMLWriter.makeRedText("UNKNOWN");
+        final String cajDirectconnState ;
+        final String isChannelConnected ;
+        if( state!=null){
+        cajDirectconnState = ConnectionState.CONNECTED.equals(state) && channel.isConnected()?   state.getName() : !ConnectionState.CONNECTED.equals(state) && !channel.isConnected() ?  HTMLWriter.makeRedText(  state.getName()) : HTMLWriter.makeRedText( channel.getCAJDirectConnectState().getName());
+
+            isChannelConnected = ConnectionState.CONNECTED.equals(state) && channel.isConnected()?   Messages.HTTP_YES  : !ConnectionState.CONNECTED.equals(state) && !channel.isConnected() ?  HTMLWriter.makeRedText(  Messages.HTTP_NO) : channel.isChannelConnected() ? Messages.HTTP_YES :
+            HTMLWriter.makeRedText(Messages.HTTP_NO);
+
+         }else{
+            cajDirectconnState=HTMLWriter.makeRedText("UNKNOWN");
+            isChannelConnected=HTMLWriter.makeRedText("UNKNOWN");
+        }
+        tableLine(new String[] {Messages.HTTP_CONN_STATE, connState});
+        tableLine(new String[] {"CAJ direct", cajDirectconnState});
+        tableLine(new String[] {"DB Direct", isChannelConnected });
+
         tableLine(new String[] {Messages.HTTP_INTERNAL_STATE, channel.getInternalState()});
         tableLine(new String[] {Messages.HTTP_CURRENT_VALUE, getValueAsString(channel.getMostRecentSample())});
 
@@ -143,6 +165,10 @@ class GetChannelResponse extends AbstractChannelResponse {
             });
         }
         text("</table>");
+        } catch (final EngineModelException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        };
         oddTableRow=false;
     }
 

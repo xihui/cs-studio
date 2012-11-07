@@ -289,6 +289,8 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
         public void monitorChanged(final MonitorEvent event) {
             synchronized(DesyJCAChannelHandler.this) {
                 DBR metadata = null;
+                final Channel channel = (Channel) event.getSource();
+                connectionState=channel.getConnectionState();
                 if (getLastMessagePayload() != null) {
                     metadata = getLastMessagePayload().getMetadata();
                 }
