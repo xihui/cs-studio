@@ -46,8 +46,7 @@ import org.epics.pvmanager.jca.JCADataSource;
 public class DesyJCADataSource extends JCADataSource {
 
     private static final Logger log = Logger.getLogger(JCADataSource.class.getName());
-
-	DesyJCATypeSupport typeSupport;
+ 	DesyJCATypeSupport typeSupport;
     public DesyJCADataSource(@Nonnull final String className,
                              final int monitorMask) {
     	 this(createContext(className), monitorMask);
@@ -83,8 +82,9 @@ public class DesyJCADataSource extends JCADataSource {
      * @param typeSupport type support to be used
      */
     public DesyJCADataSource(final Context jcaContext, final int monitorMask, final DesyJCATypeSupport typeSupport) {
-
+       super(jcaContext,monitorMask);
       	this.typeSupport=typeSupport;
+
     }
     @Override
     @Nonnull
