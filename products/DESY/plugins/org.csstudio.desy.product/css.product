@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="CSS" uid="csstudioDESY" id="org.csstudio.desy.product.product" application="org.csstudio.desy.product.application" version="1.4.1.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="CSS" uid="csstudioDESY" id="org.csstudio.desy.product.product" application="org.csstudio.desy.product.application" version="1.5.0.201211211400" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/org.csstudio.desy.product/resources/css64x64.gif"/>
       <text>
-         Control System Studio HEAD
+         Control System Studio 1.5.0
 
-Copyright (c) 2007 Stiftung Deutsches Elektronen-Synchrotron,
+Copyright (c) 2012 Stiftung Deutsches Elektronen-Synchrotron,
 Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY.
 
 THIS SOFTWARE IS PROVIDED UNDER THIS LICENSE ON AN &quot;../AS IS&quot; BASIS. 
