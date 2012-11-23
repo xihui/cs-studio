@@ -204,7 +204,8 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
                         MonitorEvent event = null;
                         if (getLastMessagePayload() != null) {
                             event = getLastMessagePayload().getEvent();
-                            connectionState=((Channel)event.getSource()).getConnectionState();
+                            //testen um deadlock
+                            // connectionState=((Channel)event.getSource()).getConnectionState();
                         }
                         processMessage(new DesyJCAMessagePayload(ev.getDBR(), event));
                     }
@@ -215,7 +216,7 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
         // Start the monitor only if the channel was (re)created, and
         // not because a disconnection/reconnection
         if (needsMonitor) {
-            channel.addMonitor(valueTypeFor(channel), countFor(channel), desyJcaDataSource.getMonitorMask(), monitorListener);
+             channel.addMonitor(valueTypeFor(channel), countFor(channel), desyJcaDataSource.getMonitorMask(), monitorListener);
             needsMonitor = false;
         }
 
@@ -230,7 +231,8 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
                         MonitorEvent event = null;
                         if (getLastMessagePayload() != null) {
                             event = getLastMessagePayload().getEvent();
-                            connectionState=((Channel)event.getSource()).getConnectionState();
+                            //testen um deadlock
+                            //connectionState=((Channel)event.getSource()).getConnectionState();
                         }
                         processMessage(new DesyJCAMessagePayload(ev.getDBR(), event));
                     }
@@ -249,17 +251,19 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
                 synchronized(DesyJCAChannelHandler.this) {
                     try {
                     	 isConnected=ev.isConnected();
-                    	 if(channel!=null) {
-                    		 if(isFirst) {
-                    			 isFirst=false;
+
+                        // Take the channel from the event so that there is no
+                        // synchronization problem
+                        final Channel channel = (Channel) ev.getSource();
+                        //testen um deadlock
+                        // connectionState=channel.getConnectionState();
+                        if(channel!=null) {
+                   		 if(isFirst) {
+                   			 isFirst=false;
 							} else {
 								LOG.info("Channel {} is {},",channel.getName(), isConnected? " Connected ": "disconnected");
 							}
 						}
-                        // Take the channel from the event so that there is no
-                        // synchronization problem
-                        final Channel channel = (Channel) ev.getSource();
-                        connectionState=channel.getConnectionState();
 
                         // Check whether the channel is large and was opened
                         // as large. Reconnect if does not match
@@ -290,7 +294,8 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
             synchronized(DesyJCAChannelHandler.this) {
                 DBR metadata = null;
                 final Channel channel = (Channel) event.getSource();
-                connectionState=channel.getConnectionState();
+                //testen um deadlock
+               // connectionState=channel.getConnectionState();
                 if (getLastMessagePayload() != null) {
                     metadata = getLastMessagePayload().getMetadata();
                 }
@@ -307,8 +312,10 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
         } catch (final CAException ex) {
             throw new RuntimeException("JCA Disconnect fail", ex);
         } finally {
-            channel = null;
-            processConnection(null);
+          channel = null;
+
+          processConnection(null);
+
         }
     }
 
@@ -342,7 +349,8 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
     public ConnectionState getCAJDirectConnectState(){
     	 synchronized(DesyJCAChannelHandler.this) {
     		 if(channel != null ) {
-				return channel.getConnectionState();
+    			    //testen um deadlock
+                 //return channel.getConnectionState();
 			}
   		   return null;
   	   }
