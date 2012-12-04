@@ -127,9 +127,6 @@ final class WriteWorker extends AbstractTimeMeasuredRunnable {
             final SampleBuffer<Serializable, ISystemVariable<Serializable>, IArchiveSample<Serializable, ISystemVariable<Serializable>>> buffer =
                 channel.getSampleBuffer();
 
-            if (buffer.isEmpty()) {
-                continue;
-            }
             buffer.updateStats();
 
             buffer.drainTo(bufferSamples);

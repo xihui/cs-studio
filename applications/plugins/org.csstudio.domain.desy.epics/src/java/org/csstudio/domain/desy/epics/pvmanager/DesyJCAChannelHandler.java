@@ -28,6 +28,7 @@ import gov.aps.jca.Monitor;
 import gov.aps.jca.dbr.DBR;
 import gov.aps.jca.dbr.DBRType;
 import gov.aps.jca.dbr.DBR_CTRL_Double;
+import gov.aps.jca.dbr.DBR_CTRL_Int;
 import gov.aps.jca.dbr.DBR_LABELS_Enum;
 import gov.aps.jca.dbr.DBR_TIME_Byte;
 import gov.aps.jca.dbr.DBR_TIME_Double;
@@ -156,6 +157,7 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
         } else if (newValue instanceof Float || newValue instanceof Double) {
             channel.put(((Number) newValue).doubleValue(), listener);
         } else {
+
             throw new RuntimeException("Unsupported type for CA: " + newValue.getClass());
         }
         desyJcaDataSource.getContext().flushIO();
@@ -188,6 +190,7 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
     }
 
     private void setup(final Channel channel) throws CAException {
+
         final DBRType metaType = metadataFor(channel);
 
         // If metadata is needed, get it
@@ -222,7 +225,7 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
 
         // Setup metadata monitor if required
         if (desyJcaDataSource.isDbePropertySupported() && metaType != null) {
-            channel.addMonitor(metaType, 1, Monitor.PROPERTY, new MonitorListener() {
+            channel.addMonitor(metaType, 1, Monitor.LOG, new MonitorListener() {
 
                 @Override
                 public void monitorChanged(final MonitorEvent ev) {
@@ -251,7 +254,7 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
                 synchronized(DesyJCAChannelHandler.this) {
                     try {
                     	 isConnected=ev.isConnected();
-
+                    	// needsMonitor =ev.isConnected();
                         // Take the channel from the event so that there is no
                         // synchronization problem
                         final Channel channel = (Channel) ev.getSource();
@@ -262,6 +265,8 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
                    			 isFirst=false;
 							} else {
 								LOG.info("Channel {} is {},",channel.getName(), isConnected? " Connected ": "disconnected");
+							//	LOG.info("Host    {} is {},",channel.getHostName(), isConnected? " Connected ": "disconnected");
+
 							}
 						}
 
@@ -375,9 +380,12 @@ public class DesyJCAChannelHandler extends MultiplexedChannelHandler<Channel, De
     protected DBRType metadataFor(final Channel channel) {
         final DBRType type = channel.getFieldType();
 
-        if (type.isBYTE() || type.isSHORT() || type.isINT() || type.isFLOAT() || type.isDOUBLE()) {
-			return DBR_CTRL_Double.TYPE;
+        if (type.isBYTE() || type.isSHORT() || type.isINT()) {
+			return DBR_CTRL_Int.TYPE;
 		}
+        if ( type.isFLOAT() || type.isDOUBLE()) {
+     			return DBR_CTRL_Double.TYPE;
+     		}
 
         if (type.isENUM()) {
 			return DBR_LABELS_Enum.TYPE;

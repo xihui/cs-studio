@@ -110,14 +110,16 @@ public abstract class DesyArchivePVManagerListener<V extends Serializable,
 
             final List<EpicsSystemVariable> sysVars = (List<EpicsSystemVariable>) _reader.getValue();
             if (_firstConnection && !sysVars.isEmpty()) {
+
                 handleOnConnectionInformation(_provider, sysVars.get(0), _channelId, _buffer.isConnected(), _startInfo);
                 _isConnected = _buffer.isConnected();
                 _firstConnection = false;
             }
             //connectionsstate of the Channel
-            if (!_firstConnection && _isConnected != _buffer.isConnected()) {
+          if (!_firstConnection && _isConnected != _buffer.isConnected()) {
 
                 _isConnected = _buffer.isConnected();
+
                 handleOnConnectionInformation(_provider,
                                               sysVars.get(0),
                                               _channelId,
@@ -157,6 +159,7 @@ public abstract class DesyArchivePVManagerListener<V extends Serializable,
                                                @Nonnull final Object data) throws OsgiServiceUnavailableException,
                                                                                      ArchiveServiceException {
 
+
         final String actualTypeFromData = ArchiveTypeConversionSupport.createArchiveTypeStringFromData(data);
 
         if (_datatype == null) {
@@ -167,6 +170,7 @@ public abstract class DesyArchivePVManagerListener<V extends Serializable,
             final String msg = "Datatype mismatch for channel: " + _channelName +
                                ". Expected from configuration is " + _datatype +
                                " which is not assignable from datatype " + actualTypeFromData + " of first received value.";
+            LOG.info(msg);
             EMAIL_LOG.info(msg);
             return false;
         }

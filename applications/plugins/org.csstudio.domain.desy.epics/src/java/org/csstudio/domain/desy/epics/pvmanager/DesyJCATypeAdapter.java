@@ -184,7 +184,7 @@ abstract class DesyJCATypeAdapter implements DataSourceTypeAdapter<Channel, Desy
     EpicsGraphicsData<W> createGraphics(@Nonnull final CTRL ctrl) {
         final Limits<W> aLimits = Limits.create((W) ctrl.getLowerAlarmLimit(), (W) ctrl.getUpperAlarmLimit());
         final Limits<W> wLimits = Limits.create((W) ctrl.getLowerWarningLimit(), (W) ctrl.getUpperWarningLimit());
-        final Limits<W> oLimits = Limits.create((W) ctrl.getLowerDispLimit(), (W) ctrl.getUpperDispLimit());
+        final Limits<W> oLimits = Limits.create((W)ctrl.getLowerDispLimit(), (W) ctrl.getUpperDispLimit());
         return new EpicsGraphicsData<W>(aLimits, wLimits, oLimits);
     }
 

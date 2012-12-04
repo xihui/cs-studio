@@ -128,7 +128,7 @@ public class ArchiveChannelBuffer<V extends Serializable, T extends ISystemVaria
         _buffer = new SampleBuffer<V, T, IArchiveSample<V, T>>(_name);
         _provider = provider;
         _source = source;
-    }
+        }
 
 
     /** @return Name of channel */

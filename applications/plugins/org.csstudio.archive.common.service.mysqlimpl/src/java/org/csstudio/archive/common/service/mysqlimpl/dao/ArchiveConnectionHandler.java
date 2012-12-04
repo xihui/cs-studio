@@ -26,6 +26,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
+import javax.naming.NamingException;
 
 import org.csstudio.archive.common.service.ArchiveConnectionException;
 import org.csstudio.archive.common.service.mysqlimpl.MySQLArchivePreferenceService;
@@ -140,6 +141,12 @@ public class ArchiveConnectionHandler {
                 connection.setAutoCommit(true);
             }
         } catch (final Exception e) {
+           try {
+            System.out.println("ArchiveConnectionHandler.connect()  "+ ds.getReference().toString());
+        } catch (final NamingException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
             throw new ArchiveConnectionException(ARCHIVE_CONNECTION_EXCEPTION_MSG, e);
         }
         if (connection == null || Strings.isNullOrEmpty(_dataSource.getDatabaseName())) {

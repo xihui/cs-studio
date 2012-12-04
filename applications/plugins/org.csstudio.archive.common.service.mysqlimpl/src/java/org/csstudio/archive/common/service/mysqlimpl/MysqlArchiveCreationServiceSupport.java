@@ -86,6 +86,7 @@ public class MysqlArchiveCreationServiceSupport {
         try {
             _sampleDao.createSamples(samples);
         } catch (final ArchiveDaoException e) {
+
             throw new ArchiveServiceException("Creation of samples failed.", e);
         }
         return true;

@@ -320,7 +320,8 @@ public abstract class ArchiveTypeConversionSupport<T extends Serializable> exten
                                          @CheckForNull final String high) throws TypeSupportException {
         // CHECKSTYLE ON : ParameterNumber
 
-        if (datatype != null) {
+        if (datatype != null && !datatype.isEmpty()) {
+
             final Class<T> clazz = (Class<T>) createTypeClassFromArchiveString(datatype);
             if (!ArchiveTypeConversionSupport.isDataTypeSerializableCollection(clazz) &&
                 !Strings.isNullOrEmpty(low) &&
