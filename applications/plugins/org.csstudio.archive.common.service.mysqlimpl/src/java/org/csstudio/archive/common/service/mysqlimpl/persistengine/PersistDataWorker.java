@@ -98,13 +98,9 @@ public class PersistDataWorker extends AbstractTimeMeasuredRunnable {
     public void measuredRun() {
         LOG.info("RUN");
         try {
-            final Connection connection = _connectionHandler.getThreadLocalConnection();
 
-            processBatchHandlers(connection, _handlerProvider, _rescueDataList);
+            processBatchHandlers(null, _handlerProvider, _rescueDataList);
 
-        } catch (final ArchiveConnectionException e) {
-            LOG.error("Connection to archive failed", e);
-            // FIXME (bknerr) : strategy for queues getting full, when to rescue data? How to check for failover?
         } catch (final Throwable t) {
             LOG.error("Unknown throwable in thread {}.", _name);
             t.printStackTrace();
@@ -113,7 +109,7 @@ public class PersistDataWorker extends AbstractTimeMeasuredRunnable {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> void processBatchHandlers(@Nonnull final Connection connection,
+    private <T> void processBatchHandlers(@Nonnull Connection connection,
                                           @Nonnull final IBatchQueueHandlerProvider handlerProvider,
                                           @Nonnull final List<T> rescueDataList) {
         final Collection<T> elements = Lists.newLinkedList();
@@ -121,10 +117,17 @@ public class PersistDataWorker extends AbstractTimeMeasuredRunnable {
             ((BatchQueueHandlerSupport<T>) handler).getQueue().drainTo(elements);
             if (!elements.isEmpty()) {
                 PreparedStatement stmt = null;
-                try {
+                try {//bei jeges Mal SQL Statement erzeugen, connection neue prüfen, ob die Connection closed ist
+                    if(connection==null || connection.isClosed() ) {
+                        connection = _connectionHandler.getThreadLocalConnection();
+                    }
                     stmt = handler.createNewStatement(connection);
                     processBatchForStatement((BatchQueueHandlerSupport<T>) handler, elements, stmt, rescueDataList);
+                } catch (final ArchiveConnectionException e) {
+                    LOG.error("Connection to archive failed", e);
+                    // FIXME (bknerr) : strategy for queues getting full, when to rescue data? How to check for failover?
                 } catch (final SQLException e) {
+                    ((BatchQueueHandlerSupport<T>) handler).getQueue().addAll(elements);
                      LOG.error("Creation of batch statement failed for strategy " + handler.getClass().getSimpleName(), e);
                     // FIXME (bknerr) : strategy for queues getting full, when to rescue data?
                 } finally {
@@ -146,9 +149,7 @@ public class PersistDataWorker extends AbstractTimeMeasuredRunnable {
             }
             executeBatchAndClearListOnCondition(handler, stmt, rescueDataList, 1);
         } catch (final Throwable t) {
-
-            handler.getQueue().addAll(elements);
-            handleThrowable(t, handler, rescueDataList);
+               handleThrowable(t, handler, rescueDataList);
         }
     }
 
