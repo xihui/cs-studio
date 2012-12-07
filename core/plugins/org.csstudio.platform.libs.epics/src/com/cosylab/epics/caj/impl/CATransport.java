@@ -604,59 +604,60 @@ public class CATransport implements Transport, ReactorHandler, Timer.TimerRunnab
 	// TODO optimize !!!
 	public void send(ByteBuffer buffer) throws IOException
 	{
-		synchronized (sendLock)
 		{
 			try
 			{
-				// prepare buffer
-				buffer.flip();
-
-				final int SEND_BUFFER_LIMIT = 16000;
-				int bufferLimit = buffer.limit();
-
-				// TODO remove?!
-				context.getLogger().finest("Sending " + bufferLimit + " bytes to " + socketAddress + ".");
-
-				// limit sending large buffers, split the into parts
-				int parts = (buffer.limit()-1) / SEND_BUFFER_LIMIT + 1;
-				for (int part = 1; part <= parts; part++)
+				synchronized (sendLock)
 				{
-					if (parts > 1)
+					// prepare buffer
+					buffer.flip();
+	
+					final int SEND_BUFFER_LIMIT = 16000;
+					int bufferLimit = buffer.limit();
+	
+					// TODO remove?!
+					context.getLogger().finest("Sending " + bufferLimit + " bytes to " + socketAddress + ".");
+	
+					// limit sending large buffers, split the into parts
+					int parts = (buffer.limit()-1) / SEND_BUFFER_LIMIT + 1;
+					for (int part = 1; part <= parts; part++)
 					{
-						buffer.limit(Math.min(part * SEND_BUFFER_LIMIT, bufferLimit));
-						context.getLogger().finest("[Parted] Sending (part " + part + "/" + parts + ") " + (buffer.limit()-buffer.position()) + " bytes to " + socketAddress + ".");
-					}
-					
-					final int TRIES = 10;
-					for (int tries = 0; /* tries <= TRIES */ ; tries++)
-					{
-						
-						// send
-						/*int bytesSent =*/ channel.write(buffer);
-						// bytesSend == buffer.position(), so there is no need for flip()
-						if (buffer.position() != buffer.limit())
+						if (parts > 1)
 						{
-							if (tries >= TRIES)
-							{
-								context.getLogger().warning("Failed to send message to " + socketAddress + " - buffer full, will retry.");
-							}
-							
-							// flush & wait for a while...
-							context.getLogger().finest("Send buffer full for " + socketAddress + ", waiting...");
-							channel.socket().getOutputStream().flush();
-							try {
-								Thread.sleep(Math.min(15000,10+tries*100));
-							} catch (InterruptedException e) {
-								// noop
-							}
-							continue;
+							buffer.limit(Math.min(part * SEND_BUFFER_LIMIT, bufferLimit));
+							context.getLogger().finest("[Parted] Sending (part " + part + "/" + parts + ") " + (buffer.limit()-buffer.position()) + " bytes to " + socketAddress + ".");
 						}
-						else
-							break;
+						
+						final int TRIES = 10;
+						for (int tries = 0; /* tries <= TRIES */ ; tries++)
+						{
+							
+							// send
+							/*int bytesSent =*/ channel.write(buffer);
+							// bytesSend == buffer.position(), so there is no need for flip()
+							if (buffer.position() != buffer.limit())
+							{
+								if (tries >= TRIES)
+								{
+									context.getLogger().warning("Failed to send message to " + socketAddress + " - buffer full, will retry.");
+								}
+								
+								// flush & wait for a while...
+								context.getLogger().finest("Send buffer full for " + socketAddress + ", waiting...");
+								channel.socket().getOutputStream().flush();
+								try {
+									Thread.sleep(Math.min(15000,10+tries*100));
+								} catch (InterruptedException e) {
+									// noop
+								}
+								continue;
+							}
+							else
+								break;
+						}
+					
 					}
-				
-				}
-				
+				}				
 			}
 			catch (IOException ioex) 
 			{
