@@ -665,6 +665,9 @@ public class CATransport implements Transport, ReactorHandler, Timer.TimerRunnab
 				// close connection
 				close(true);
 				throw ioex;
+			}catch (Exception e) {
+				close(true);
+				e.printStackTrace();
 			}
 		
 	}
