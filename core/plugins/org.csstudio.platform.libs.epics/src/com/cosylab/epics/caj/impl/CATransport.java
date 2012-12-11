@@ -604,11 +604,11 @@ public class CATransport implements Transport, ReactorHandler, Timer.TimerRunnab
 	// TODO optimize !!!
 	public void send(ByteBuffer buffer) throws IOException
 	{
-		
+		synchronized (sendLock)
+		{
 			try
 			{
-				synchronized (sendLock)
-				{
+				
 				// prepare buffer
 				buffer.flip();
 
@@ -659,12 +659,13 @@ public class CATransport implements Transport, ReactorHandler, Timer.TimerRunnab
 				}
 				
 			}
-			}
+			
 			catch (IOException ioex) 
 			{
 				// close connection
 				close(true);
 				throw ioex;
+			}
 			}
 	}
 
