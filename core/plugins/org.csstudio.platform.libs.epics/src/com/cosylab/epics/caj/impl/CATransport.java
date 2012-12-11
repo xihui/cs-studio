@@ -608,7 +608,7 @@ public class CATransport implements Transport, ReactorHandler, Timer.TimerRunnab
 			try
 			{
 				synchronized (sendLock)
-		     	{
+				{
 				// prepare buffer
 				buffer.flip();
 
@@ -640,7 +640,6 @@ public class CATransport implements Transport, ReactorHandler, Timer.TimerRunnab
 							if (tries >= TRIES)
 							{
 								context.getLogger().warning("Failed to send message to " + socketAddress + " - buffer full, will retry.");
-								return;
 							}
 							
 							// flush & wait for a while...
@@ -650,7 +649,6 @@ public class CATransport implements Transport, ReactorHandler, Timer.TimerRunnab
 								Thread.sleep(Math.min(15000,10+tries*100));
 							} catch (InterruptedException e) {
 								// noop
-								e.printStackTrace();
 							}
 							continue;
 						}
@@ -659,20 +657,15 @@ public class CATransport implements Transport, ReactorHandler, Timer.TimerRunnab
 					}
 				
 				}
-	     	}
-			}	
-		
+				
+			}
+			}
 			catch (IOException ioex) 
 			{
 				// close connection
 				close(true);
 				throw ioex;
-			}catch (Exception e) {
-				close(true);
-				e.printStackTrace();
 			}
-    	
-		
 	}
 
 	/**
