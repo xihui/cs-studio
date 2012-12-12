@@ -24,6 +24,7 @@ Export-Package:
  com.cosylab.epics.caj.impl.sync,
  com.cosylab.epics.caj.util,
  com.cosylab.epics.caj.util.logging,
+ com.cosylab.epics.caj.util.nif,
  gov.aps.jca,
  gov.aps.jca.cas,
  gov.aps.jca.configuration,
