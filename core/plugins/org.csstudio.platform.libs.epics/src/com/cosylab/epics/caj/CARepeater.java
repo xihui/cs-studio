@@ -20,7 +20,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -573,9 +572,6 @@ public class CARepeater implements Runnable
 			// bind succeeded, repeater not running
 			return false;
 		} catch (BindException be) {
-			// bind failed, socket in use
-			return true;
-		} catch (SocketException be) {
 			// bind failed, socket in use
 			return true;
 		} catch (Throwable th) {
