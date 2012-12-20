@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test fragment for archive common engine host plugin
 Bundle-SymbolicName: org.csstudio.archive.common.engine.test
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.201212201100
 Fragment-Host: org.csstudio.archive.common.engine;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.csstudio.archive.common.service.mysqlimpl;bundle-version="1.0.0",

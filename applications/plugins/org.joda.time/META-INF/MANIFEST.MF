@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Joda
 Bundle-SymbolicName: org.joda.time
-Bundle-Version: 1.6.2.qualifier
+Bundle-Version: 1.6.2.201212201100
 Export-Package: org.joda.time;
   uses:="org.joda.time.field,
    org.joda.time.base,

@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.desy.platform.eclipse.ecf.feature"
       label="Platform Eclipse ECF Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       provider-name="DESY, Jan Hatje &lt;css-developer@desy.de&gt;">
 
    <description url="http://css.desy.de">

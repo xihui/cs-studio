@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Olog Viewer
 Bundle-SymbolicName: org.csstudio.logbook.ologviewer;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.201212201100
 Bundle-Activator: org.csstudio.logbook.ologviewer.Activator
 Bundle-Vendor: NSLSII<shroffk@bnl.gov>
 Require-Bundle: org.eclipse.ui,

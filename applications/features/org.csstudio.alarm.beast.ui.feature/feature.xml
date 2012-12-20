@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.alarm.beast.ui.feature"
       label="Alarm Handler UI"
-      version="3.1.0.qualifier"
+      version="3.1.0.201212201100"
       provider-name="Kay Kasemir &lt;kasemirk@ornl.gov&gt; - SNS">
 
    <description>

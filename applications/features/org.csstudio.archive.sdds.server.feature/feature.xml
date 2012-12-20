@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.archive.sdds.server.feature"
       label="SDDS Server Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       os="win32"
       ws="win32"
       arch="sparc,x86,x86_64">

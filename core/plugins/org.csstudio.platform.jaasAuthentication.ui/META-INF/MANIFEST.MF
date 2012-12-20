@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: JAAS Authentication UI
 Bundle-SymbolicName: org.csstudio.platform.jaasAuthentication.ui;singleton:=true
 Bundle-Description: Preference page for JAAS Authentication (LDAP, Kerberos, ...)
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.0.0.201212201100
 Bundle-Vendor: Kay Kasemir <kasemirk@ornl.gov> - SNS
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,

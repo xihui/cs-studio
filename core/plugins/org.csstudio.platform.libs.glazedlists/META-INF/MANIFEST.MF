@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Glazedlists
 Bundle-SymbolicName: org.csstudio.platform.libs.glazedlists
-Bundle-Version: 1.8.0.qualifier
+Bundle-Version: 1.8.0.201212201100
 Bundle-Activator: org.csstudio.platform.libs.glazedlists.Activator
 Require-Bundle: org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy

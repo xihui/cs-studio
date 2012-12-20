@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.ams.distributor.feature"
       label="AmsDistributor Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       provider-name="DESY &lt;css-developer@desy.de&gt;, Markus Moeller"
       os="win32"
       ws="win32"

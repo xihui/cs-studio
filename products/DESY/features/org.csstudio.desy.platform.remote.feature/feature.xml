@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.desy.platform.remote.feature"
       label="DESY Platform Remote Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       provider-name="DESY, Jan Hatje &lt;css-developer@desy.de&gt;">
 
    <description url="http://www.example.com/description">

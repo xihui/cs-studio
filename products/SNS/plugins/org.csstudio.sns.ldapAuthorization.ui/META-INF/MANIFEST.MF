@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: LDAP Authorization UI
 Bundle-SymbolicName: org.csstudio.sns.ldapAuthorization.ui;singleton:=true
-Bundle-Version: 1.1.1.qualifier
+Bundle-Version: 1.1.1.201212201100
 Bundle-Activator: org.csstudio.sns.ldapauthorization.ui.Activator
 Bundle-Vendor: SNS
 Bundle-Localization: plugin

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Channel Utilities
 Bundle-SymbolicName: org.csstudio.utility.channel; singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.201212201100
 Bundle-Activator: org.csstudio.utility.channel.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

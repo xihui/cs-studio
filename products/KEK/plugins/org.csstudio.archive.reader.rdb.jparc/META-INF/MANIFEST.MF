@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: RDB archive reader for JPARC schema
 Bundle-Description: RDB archive reader for JPARC schema
 Bundle-SymbolicName: org.csstudio.archive.reader.rdb.jparc;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.201212201100
 Bundle-Vendor: Kay Kasemir <kasemirk@ornl.gov> - SNS
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.csstudio.apputil;bundle-version="3.0.0",

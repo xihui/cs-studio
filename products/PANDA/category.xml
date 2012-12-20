@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.csstudio.panda.core.feature_3.0.0.qualifier.jar" id="org.csstudio.panda.core.feature" version="3.0.0.qualifier">
+   <feature url="features/org.csstudio.panda.core.feature_3.0.0.201212201100.jar" id="org.csstudio.panda.core.feature" version="3.0.0.201212201100">
       <category name="Core"/>
    </feature>
-   <feature url="features/org.csstudio.panda.applications.feature_3.0.0.qualifier.jar" id="org.csstudio.panda.applications.feature" version="3.0.0.qualifier">
+   <feature url="features/org.csstudio.panda.applications.feature_3.0.0.201212201100.jar" id="org.csstudio.panda.applications.feature" version="3.0.0.201212201100">
       <category name="Applications"/>
    </feature>
    <category-def name="Core" label="Core"/>

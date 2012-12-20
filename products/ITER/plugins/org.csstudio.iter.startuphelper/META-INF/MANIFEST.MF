@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: ITER Startup Helper
 Bundle-Vendor: Fred Arnaud <frederic.arnaud@iter.org> - ITER, SNS
 Bundle-SymbolicName: org.csstudio.iter.startuphelper
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.201212201100
 Bundle-Activator: org.csstudio.iter.startuphelper.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui;bundle-version="3.4.0",

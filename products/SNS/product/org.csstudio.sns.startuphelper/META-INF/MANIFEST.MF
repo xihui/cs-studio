@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SNS Startup Helper
 Bundle-SymbolicName: org.csstudio.sns.startuphelper
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.0.0.201212201100
 Bundle-Activator: org.csstudio.sns.startuphelper.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui;bundle-version="3.4.0",

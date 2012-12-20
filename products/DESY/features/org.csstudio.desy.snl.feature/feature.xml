@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.desy.snl.feature"
       label="SNL Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       provider-name="DESY, Jan Hatje &lt;jan.hatje@desy.de&gt;">
 
    <description url="http://www.example.com/description">

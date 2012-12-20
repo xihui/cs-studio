@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ui
 Bundle-SymbolicName: org.csstudio.platform.libs.dal.ui;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.201212201100
 Bundle-Localization: plugin
 Bundle-Activator: org.csstudio.platform.libs.dal.ui.Activator
 Require-Bundle: org.eclipse.ui,

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Java Mail API
 Bundle-SymbolicName: javax.mail
-Bundle-Version: 1.4.4.qualifier
+Bundle-Version: 1.4.4.201212201100
 Export-Package: com.sun.mail.auth,
  com.sun.mail.handlers,
  com.sun.mail.iap,

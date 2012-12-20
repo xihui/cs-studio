@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.tine2jms.feature"
       label="Tine2Jms Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       os="win32"
       ws="win32"
       arch="x86_64">

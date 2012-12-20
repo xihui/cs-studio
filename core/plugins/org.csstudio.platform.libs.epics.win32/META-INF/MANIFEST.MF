@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JNI bindings for Windows 32 bit
 Bundle-SymbolicName: org.csstudio.platform.libs.epics.win32;singleton:=true
-Bundle-Version: 1.1.6.qualifier
+Bundle-Version: 1.1.6.201212201100
 Fragment-Host: org.csstudio.platform.libs.epics;bundle-version="1.1.6"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-NativeCode: 

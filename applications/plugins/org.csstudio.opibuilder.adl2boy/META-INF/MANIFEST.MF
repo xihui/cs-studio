@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ADL to BOY converter
 Bundle-SymbolicName: org.csstudio.opibuilder.adl2boy; singleton:=true
-Bundle-Version: 1.0.5.qualifier
+Bundle-Version: 1.0.5.201212201100
 Bundle-Activator: org.csstudio.opibuilder.adl2boy.ADL2BOYPlugin
 Bundle-Vendor: John Hammonds <JPHammonds@anl.gov> - APS
 Require-Bundle: org.jdom;bundle-version="1.1.0",

@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.iter.ui.feature"
       label="CSS Eclipse UI Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       provider-name="ITER"
       os="linux"
       ws="gtk"

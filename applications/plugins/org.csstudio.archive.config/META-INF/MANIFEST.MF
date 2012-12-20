@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Archive Configuration API
 Bundle-SymbolicName: org.csstudio.archive.config;singleton:=true
 Bundle-Description: API for the configuration of an archive (engines, groups, channels, sample methods, ...)
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.201212201100
 Bundle-Vendor: Kay Kasemir <kasemirk@ornl.gov> - SNS
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.csstudio.archive.config

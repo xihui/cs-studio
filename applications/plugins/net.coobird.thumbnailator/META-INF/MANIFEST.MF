@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Thumbnailator
 Bundle-SymbolicName: net.coobird.thumbnailator
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.0.201212201100
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: net.coobird.thumbnailator,
  net.coobird.thumbnailator.builders,

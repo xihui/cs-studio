@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.ams.application.monitor.feature"
       label="AMS Monitor Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       provider-name="Markus Moeller &lt;markus.moeller@desy.de&gt;"
       os="win32"
       ws="win32"

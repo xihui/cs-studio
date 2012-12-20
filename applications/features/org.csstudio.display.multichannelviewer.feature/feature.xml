@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.display.multichannelviewer.feature"
       label="MultiChannelViewer Feature"
-      version="0.0.1.qualifier"
+      version="0.0.1.201212201100"
       provider-name="Kunal Shroff &lt;kshroff@bnl.gov&gt;, Gabriele Carcassi &lt;carcassi@bnl.gov&gt; - BNL">
 
    <description url="http://www.example.com/description">

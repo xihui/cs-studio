@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Product
 Bundle-SymbolicName: org.csstudio.desy.controlroom.product;singleton:=true
-Bundle-Version: 1.4.0.qualifier
+Bundle-Version: 1.4.0.201212201100
 Bundle-Vendor: Desy, Jan Hatje <jan.hatje@desy.de>
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui;bundle-version="3.4.0",

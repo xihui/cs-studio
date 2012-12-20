@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.alarm.jms2ora.feature"
       label="Jms2Ora Feature"
-      version="1.0.0.qualifier"
+      version="1.0.0.201212201100"
       provider-name="Markus Moeller &lt;markus.moeller@desy.de&gt;"
       os="solaris,win32"
       ws="gtk,win32"
