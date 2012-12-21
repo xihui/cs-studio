@@ -32,7 +32,7 @@ THE FULL LICENSE SPECIFYING FOR THE SOFTWARE THE REDISTRIBUTION, MODIFICATION, U
    </license>
 
    <url>
-      <update label="Desy Update Site" url="http://eclipse.desy.de/css/update/"/>
+      <update label="Desy Update Site" url="http://eclipse.desy.de/css/update-beta/"/>
    </url>
 
    <plugin
