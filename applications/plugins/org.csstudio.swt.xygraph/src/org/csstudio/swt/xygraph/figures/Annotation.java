@@ -182,6 +182,8 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		Dimension size = infoLabel.getPreferredSize();
 		updateX0Y0Fromdxdy(size);	
 		//System.out.println(x0 +": " +y0 + " ");
+		System.out.println("---- curr pos x: " + currentPosition.x + "   y  " + currentPosition.y);
+		System.out.println("---- x0: " + x0 + "   y0  " + y0);
 
 		Rectangle infoBounds = new Rectangle((int) (currentPosition.x + x0 - size.width/2.0), 
 				(int) (currentPosition.y +y0 - size.height/2.0), size.width, size.height);
@@ -725,10 +727,36 @@ class InfoLabelDragger extends MouseMotionListener.Stub implements MouseListener
 	public void mouseDragged(MouseEvent me) {
 		x0 = me.getLocation().x - currentPosition.x;
 		y0 = me.getLocation().y - currentPosition.y;
+		
+		limitx0y0ToPlotArea();
+
 		knowX0Y0 = true;
 		updatedxdyFromX0Y0();
 		Annotation.this.repaint();
 		me.consume();
+	}
+
+	private void limitx0y0ToPlotArea() {
+		Dimension size = infoLabel.getPreferredSize();
+
+		//check if annotation is outside of left plot border
+        if (currentPosition.x + x0 - size.width/2.0 < xyGraph.getPlotArea().getBounds().x+2) {
+            x0 = xyGraph.getPlotArea().getBounds().x+2 - currentPosition.x + size.width/2.0;
+        }
+        //check if annotation is outside of top plot border
+        if (currentPosition.y + y0 - size.height/2.0 < xyGraph.getPlotArea().getBounds().y+2) {
+            y0 = xyGraph.getPlotArea().getBounds().y+2 - currentPosition.y + size.height/2.0;
+        }
+        //check if annotation is outside of right plot border
+        if (currentPosition.x + x0 - size.width/2.0 > xyGraph.getPlotArea().getBounds().x + xyGraph.getPlotArea().getBounds().width - 20) {
+            x0 = xyGraph.getPlotArea().getBounds().x + xyGraph.getPlotArea().getBounds().width
+            - 20 - currentPosition.x + size.width/2.0;
+        }
+        //check if annotation is outside of bottom plot border
+        if (currentPosition.y + y0 - size.height/2.0 > xyGraph.getPlotArea().getBounds().y + xyGraph.getPlotArea().getBounds().height - 20) {
+            y0 = xyGraph.getPlotArea().getBounds().y + xyGraph.getPlotArea().getBounds().height
+            - 20 - currentPosition.y + size.height/2.0;
+        }
 	}
 
 	public void mouseDoubleClicked(MouseEvent me) {}
