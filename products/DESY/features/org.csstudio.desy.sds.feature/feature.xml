@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.desy.sds.feature"
       label="SDS Feature"
-      version="1.0.0.201212201100"
+      version="1.0.0.201301041000"
       provider-name="DESY, Jan Hatje &lt;css-developer@desy.de&gt;">
 
    <description url="http://www.example.com/description">

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: TrendPlotter
 Bundle-SymbolicName: org.csstudio.common.trendplotter;singleton:=true
-Bundle-Version: 3.1.1.201208201400
+Bundle-Version: 3.1.1.201301041000
 Bundle-Description: Strip chart type display of live and historic data
 Bundle-Activator: org.csstudio.common.trendplotter.Activator
 Bundle-Localization: plugin
