@@ -588,4 +588,9 @@ final class ModelXYLayoutEditPolicy extends XYLayoutEditPolicy {
 	protected Dimension getMinimumSizeFor(GraphicalEditPart child) {
 		return new Dimension(1, 1);
 	}
+	
+	//TODO (jhatje): is this the right way to get the relative position in AbstractConnectionEditPart?
+	public void getRelativePosition(Point p) {
+		translateFromAbsoluteToLayoutRelative(p);
+	}
 }
