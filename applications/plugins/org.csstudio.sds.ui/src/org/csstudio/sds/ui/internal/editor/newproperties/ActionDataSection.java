@@ -289,6 +289,8 @@ public class ActionDataSection extends AbstractBaseSection<ActionDataProperty> {
 						.getInstance().getImageDescriptorFromPlugin(
 								SdsUiPlugin.PLUGIN_ID,
 								_actionModel.getType().getIcon());
+				System.out.println("--------- " + _actionModel.getType().getIcon());
+				System.out.println(" imgDesct " + imageDescriptor.toString());
 				return imageDescriptor.createImage();
 			}
 			return null;

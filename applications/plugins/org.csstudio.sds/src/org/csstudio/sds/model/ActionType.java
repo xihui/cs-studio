@@ -58,12 +58,12 @@ public enum ActionType {
 	/**
 	 * Open Trend.
 	 */
-	OPEN_DATA_BROWSER("Open Data Browser", "icons/openshell2.gif", new OpenDataBrowserActionModelFactory()),
+	OPEN_DATA_BROWSER("Open Data Browser", "icons/databrowser.png", new OpenDataBrowserActionModelFactory()),
 
 	/**
 	 * Open Pdf.
 	 */
-	OPEN_PDF("Open Pdf", "icons/pdf_icon.gif", new OpenPdfActionModelFactory());
+	OPEN_PDF("Open Pdf", "icons/pdf-icon.gif", new OpenPdfActionModelFactory());
 	
 	/**
 	 * The title of this {@link ActionType}.

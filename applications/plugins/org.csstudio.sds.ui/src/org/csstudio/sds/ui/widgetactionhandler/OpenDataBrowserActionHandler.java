@@ -18,7 +18,7 @@ public class OpenDataBrowserActionHandler implements IWidgetActionHandler {
 	
     private static final Logger LOG = LoggerFactory.getLogger(OpenDataBrowserActionHandler.class);
 
-    private static final String STRIP_TOOL_ID = "org.csstudio.platform.ui.striptool";
+    private static final String STRIP_TOOL_ID = "org.csstudio.desy.startuphelper.striptool";
 
     public void executeAction(AbstractWidgetModel widget, AbstractWidgetActionModel action) {
         assert action instanceof OpenDataBrowserActionModel : "action instanceof OpenDataBrowserActionModel";
