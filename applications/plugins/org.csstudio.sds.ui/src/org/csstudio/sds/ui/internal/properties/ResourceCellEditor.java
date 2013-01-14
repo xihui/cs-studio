@@ -133,12 +133,24 @@ public final class ResourceCellEditor extends AbstractDialogCellEditor {
 	@Override
 	protected void openDialog(final Shell parentShell, final String dialogTitle) {
 		if (_onlyWorkSpace) {
-			SdsResourceSelectionDialog rsd = new SdsResourceSelectionDialog(
-					parentShell);
-//			rsd.setSelectedResource(_path);
-			if (rsd.open() == Window.OK) {
-				if (rsd.getSelectedPath() != null) {
-					_path = rsd.getSelectedPath();
+			//sds resource dialog can only handle sds files
+			if (sdsFileResourceOnly()) {
+				SdsResourceSelectionDialog rsd = new SdsResourceSelectionDialog(
+						parentShell);
+				//rsd.setSelectedResource(_path);
+				if (rsd.open() == Window.OK) {
+					if (rsd.getSelectedPath() != null) {
+						_path = rsd.getSelectedPath();
+					}
+				}
+			} else {
+				ResourceSelectionDialog rsd = new ResourceSelectionDialog(
+						parentShell, "Select a resource", _fileExtensions);
+							rsd.setSelectedResource(_path);
+				if (rsd.open() == Window.OK) {
+					if (rsd.getSelectedResource() != null) {
+						_path = rsd.getSelectedResource();
+					}
 				}
 			}
 		} else {
@@ -155,6 +167,16 @@ public final class ResourceCellEditor extends AbstractDialogCellEditor {
 			_filterPath = dialog.getFilterPath();
 			_path = new Path(_filterPath + Path.SEPARATOR + name);
 		}
+	}
+
+	
+	private boolean sdsFileResourceOnly() {
+		if (_fileExtensions.length == 1) {
+			if (_fileExtensions[0].equals("css-sds")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
