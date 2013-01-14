@@ -137,6 +137,7 @@ public class DisplayEditorActionBarContributor extends ActionBarContributor {
 		tbm.add(getAction(GEFActionConstants.ZOOM_OUT));
 		tbm.add(new ZoomComboContributionItem(getPage()));
 		tbm.add(new GridSpacingContributionItem());
+		tbm.add(new RunDisplayContributionItem());
 	}
 
 	/**
