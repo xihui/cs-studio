@@ -12,6 +12,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
@@ -65,12 +67,22 @@ public class DB2Shell {
         Plot plot = Plot.forCanvas(plot_box);
         
         // Create and start controller
-        Controller controller = new Controller(_shell, model, plot);
+        final Controller controller = new Controller(_shell, model, plot);
         try {
             controller.start();
         } catch (Exception ex) {
             MessageDialog.openError(_shell, Messages.Error, NLS.bind(Messages.ControllerStartErrorFmt, ex.getMessage()));
         }
+        
+        // add dispose listener
+        _shell.addDisposeListener(new DisposeListener() {
+            /**
+             * {@inheritDoc}
+             */
+            public void widgetDisposed(final DisposeEvent e) {
+                controller.stop();
+            }
+        });
         
         // open the shell
         _shell.open();
