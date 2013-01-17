@@ -27,6 +27,7 @@ import org.csstudio.sds.model.properties.actions.IActionModelFactory;
 import org.csstudio.sds.model.properties.actions.OpenDataBrowserActionModelFactory;
 import org.csstudio.sds.model.properties.actions.OpenDisplayActionModelFactory;
 import org.csstudio.sds.model.properties.actions.OpenPdfActionModelFactory;
+import org.csstudio.sds.model.properties.actions.OpenUrlActionModelFactory;
 
 /**
  * The types that can be used for the property ActionData.
@@ -63,7 +64,12 @@ public enum ActionType {
 	/**
 	 * Open Pdf.
 	 */
-	OPEN_PDF("Open Pdf", "icons/pdf-icon.gif", new OpenPdfActionModelFactory());
+	OPEN_PDF("Open Pdf", "icons/pdf-icon.gif", new OpenPdfActionModelFactory()),
+	
+	/**
+	 * Open Url.
+	 */
+	OPEN_URL("Open Url", "icons/web-icon.gif", new OpenUrlActionModelFactory());
 	
 	/**
 	 * The title of this {@link ActionType}.

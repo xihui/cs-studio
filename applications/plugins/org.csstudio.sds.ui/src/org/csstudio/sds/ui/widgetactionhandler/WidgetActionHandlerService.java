@@ -65,6 +65,7 @@ public final class WidgetActionHandlerService {
 		_handler.put(ActionType.EXECUTE_SCRIPT, new ExecuteScriptActionHandler());
 		_handler.put(ActionType.OPEN_DATA_BROWSER, new OpenDataBrowserActionHandler());
 		_handler.put(ActionType.OPEN_PDF, new OpenPdfActionHandler());
+		_handler.put(ActionType.OPEN_URL, new OpenUrlActionHandler());
 	}
 
 	/**

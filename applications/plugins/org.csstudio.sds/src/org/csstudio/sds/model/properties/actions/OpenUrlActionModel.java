@@ -8,30 +8,30 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 /**
- * A {@link AbstractWidgetActionModel}, which opens a Pdf file.
+ * A {@link AbstractWidgetActionModel}, which opens an Url in default browser.
  * 
  * @author Kai Meyer
  */
-public class OpenPdfActionModel extends AbstractWidgetActionModel {
+public class OpenUrlActionModel extends AbstractWidgetActionModel {
 	/**
 	 * The ID for the <i>resource</i> property.
 	 */
-	public static final String PROP_RESOURCE = "resource";
+	public static final String PROP_URL = "url";
 	
 	/**
 	 * The ID for the <i>description</i> property.
 	 */
 	public static final String PROP_DESCRIPTION = "description";
 
-	public OpenPdfActionModel() {
-		super(ActionType.OPEN_PDF.getTitle(), ActionType.OPEN_PDF);
+	public OpenUrlActionModel() {
+		super(ActionType.OPEN_URL.getTitle(), ActionType.OPEN_URL);
 	}
 
 	@Override
 	protected void createProperties() {
-		ResourceProperty resource = new ResourceProperty("Pdf file", WidgetPropertyCategory.BEHAVIOR, new Path(""),
-				new String[] { "pdf", "PDF" });
-		addProperty(PROP_RESOURCE, resource);
+		StringProperty url = new StringProperty("Url",
+				WidgetPropertyCategory.BEHAVIOR, "");
+		addProperty(PROP_URL, url);
 		StringProperty description = new StringProperty("Description",
 				WidgetPropertyCategory.BEHAVIOR, "");
 		addProperty(PROP_DESCRIPTION, description);
@@ -42,8 +42,8 @@ public class OpenPdfActionModel extends AbstractWidgetActionModel {
 	 * 
 	 * @return The {@link IPath} to the display
 	 */
-	public IPath getResource() {
-		return getProperty(PROP_RESOURCE).getPropertyValue();
+	public String getResource() {
+		return getProperty(PROP_URL).getPropertyValue();
 	}
 	
 	/**
@@ -57,16 +57,6 @@ public class OpenPdfActionModel extends AbstractWidgetActionModel {
 
 	@Override
 	public String getActionLabel() {
-		if (getDescription() == null || getDescription().trim().length() == 0) {
-			StringBuffer buffer = new StringBuffer(this.getType().getTitle());
-			buffer.append(" ");
-			if (this.getResource().lastSegment() == null) {
-				buffer.append("unspecified");
-			} else {
-				buffer.append(this.getResource().lastSegment());
-			}
-			return buffer.toString();
-		}
 		return getDescription();
 	}
 
