@@ -24,6 +24,10 @@ public class OpenUrlActionHandler implements IWidgetActionHandler {
 		OpenUrlActionModel urlModel = (OpenUrlActionModel) action;
 
 		String resource = urlModel.getResource();
+		//if there is no protocol use http
+		if (!resource.contains("://")) {
+			resource = "http://" + resource;
+		}
 		URL url = null;
 		try {
 			url = new URL(resource);
