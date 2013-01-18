@@ -16,6 +16,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
@@ -63,7 +65,17 @@ public class PVpopupHandler extends AbstractHandler {
         } catch (final Exception ex) {
             MessageDialog.openError(shell, Messages.Error, NLS.bind(Messages.ControllerStartErrorFmt, ex.getMessage()));
         }
-        
+
+        // add dispose listener
+        shell.addDisposeListener(new DisposeListener() {
+            /**
+             * {@inheritDoc}
+             */
+            public void widgetDisposed(final DisposeEvent e) {
+                controller.stop();
+            }
+        });
+
         // open the shell
         shell.open();
 

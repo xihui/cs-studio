@@ -2,9 +2,11 @@ package org.csstudio.common.trendplotter;
 
 import java.util.logging.Level;
 
+
 import org.csstudio.common.trendplotter.Activator;
 import org.csstudio.common.trendplotter.Messages;
 import org.csstudio.common.trendplotter.editor.DataBrowserEditor;
+import org.csstudio.common.trendplotter.model.HistoricSamples;
 import org.csstudio.common.trendplotter.model.Model;
 import org.csstudio.common.trendplotter.ui.Controller;
 import org.csstudio.common.trendplotter.ui.Plot;
@@ -18,6 +20,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Open a db2 trend in a shell. Most parts are from class {@link DataBrowserEditor}
@@ -32,6 +36,8 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class DB2Shell {
     
+    private static final Logger LOG = LoggerFactory.getLogger(HistoricSamples.class);
+
     private IFile _file;
     private Shell _shell;
     private Model model;
