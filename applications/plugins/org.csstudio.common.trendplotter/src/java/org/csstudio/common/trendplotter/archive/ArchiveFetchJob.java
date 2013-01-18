@@ -20,6 +20,7 @@ import org.csstudio.common.trendplotter.model.ArchiveDataSource;
 import org.csstudio.common.trendplotter.model.PVItem;
 import org.csstudio.common.trendplotter.model.RequestType;
 import org.csstudio.common.trendplotter.preferences.Preferences;
+import org.csstudio.data.values.IDoubleValue;
 import org.csstudio.data.values.ITimestamp;
 import org.csstudio.data.values.IValue;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -108,7 +109,7 @@ public class ArchiveFetchJob extends Job
         @Override
         public void run()
         {
-            Activator.getLogger().log(Level.FINE, "Starting {0}", ArchiveFetchJob.this); //$NON-NLS-1$
+            LOG.info("start archive fetch ");
             final int bins = Preferences.getPlotBins();
             final ArchiveDataSource archives[] = item.getArchiveDataSources();
             for (int i=0; i<archives.length && !cancelled; ++i)
@@ -147,6 +148,8 @@ public class ArchiveFetchJob extends Job
                     
                     while (value_iter.hasNext()) {
                         final IValue next = value_iter.next();
+                        LOG.trace(url + " - val: " + ((IDoubleValue)next).getValue() + " time: " + next.getTime());
+//                        System.out.println("----- " + url + " - val: " + ((IDoubleValue)next).getValue() + " time: " + next.getTime());
                         result.add(next);
                     }
                     LOG.debug(result.size() + " samples from source " + url);
