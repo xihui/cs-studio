@@ -61,6 +61,12 @@ public class MaintenanceRule implements IRule {
                 Object obj = arguments[0];
                 if(obj instanceof String) {
                     String rtyp = (String) obj;
+                    //get type if rtyp is a record name
+                    if(rtyp.contains("_")) {
+                    	int beginTypeTag = rtyp.lastIndexOf("_");
+                    	int endTypeTag = rtyp.indexOf(" ");
+                    	rtyp = rtyp.substring(beginTypeTag+1, endTypeTag);
+                    }
                     int indexOf = _preFileName.toLowerCase().indexOf("{rtyp}");
                     if(indexOf >= 0) {
                         StringBuilder sb = new StringBuilder();
