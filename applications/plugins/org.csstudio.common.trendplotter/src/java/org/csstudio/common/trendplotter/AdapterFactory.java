@@ -13,6 +13,7 @@ import org.csstudio.common.trendplotter.model.PlotSamples;
 import org.csstudio.csdata.ProcessVariable;
 import org.csstudio.data.values.IValue;
 import org.eclipse.core.runtime.IAdapterFactory;
+import org.epics.vtype.VType;
 
 /** Adapt Data Browser model items to CSS PV
  *
@@ -60,11 +61,11 @@ public class AdapterFactory implements IAdapterFactory
     private ProcessVariableWithSamples convertToPvWithSamples(final ModelItem item)
     {
         final PlotSamples plot_samples = item.getSamples();
-        final IValue[] samples;
+        final VType[] samples;
         synchronized (plot_samples)
         {
             final int size = plot_samples.getSize();
-            samples = new IValue[size];
+            samples = new VType[size];
             for (int i=0; i<size; ++i)
                 samples[i] = plot_samples.getSample(i).getValue();
         }

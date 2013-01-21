@@ -20,6 +20,7 @@ import org.csstudio.apputil.xml.DOMHelper;
 import org.csstudio.apputil.xml.XMLWriter;
 import org.csstudio.archive.common.service.ArchiveServiceException;
 import org.csstudio.archive.reader.ArchiveReader;
+import org.csstudio.archive.vtype.VTypeHelper;
 import org.csstudio.common.trendplotter.Messages;
 import org.csstudio.common.trendplotter.imports.ImportArchiveReaderFactory;
 import org.csstudio.common.trendplotter.preferences.Preferences;
@@ -457,7 +458,7 @@ public class PVItem extends ModelItem implements PVListener {
         synchronized (samples) {
             final int size = samples.getSize();
             if (size > 0) {
-                final String last = samples.getSample(size - 1).getValue().getStatus();
+                final String last = VTypeHelper.getMessage(samples.getSample(size - 1).getValue());
                 // Does last sample already have 'disconnected' status?
                 if (last != null && last.equals(Messages.Model_Disconnected)) {
                     return;

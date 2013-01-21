@@ -161,6 +161,7 @@ public class Messages extends NLS
     public static String Model_Disconnected;
     public static String Name;
     public static String NameLbl;
+    public static String NegErrColumn;
     public static String NotApplicable;
     public static String NotSaved;
     public static String NotSavedTT;
@@ -174,6 +175,7 @@ public class Messages extends NLS
     public static String Plot_TimeAxisName;
     public static String Plot_ValueAxisName;
     public static String Plot_ValueAxisNameFMT;
+    public static String PosErrColumn;
     public static String PrefPage_ArchiveFetchDelay;
     public static String PrefPage_Archives;
     public static String PrefPage_DataServerURLs;

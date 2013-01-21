@@ -235,9 +235,10 @@ public class HistoricSamples extends PlotSamples
     private PlotSample[] removeNotConnectedValues(PlotSample[] array) {
         List<PlotSample> samplesWithoutNA = new ArrayList<PlotSample>(array.length);
         for (PlotSample sample : array) {
-            if (!sample.getValue().format().startsWith("#")) {
-                samplesWithoutNA.add(sample);
-            }
+            //TODO (jhatje)
+//            if (!sample.getValue().format().startsWith("#")) {
+//                samplesWithoutNA.add(sample);
+//            }
         }
         return samplesWithoutNA.toArray(new PlotSample[0]);
     }

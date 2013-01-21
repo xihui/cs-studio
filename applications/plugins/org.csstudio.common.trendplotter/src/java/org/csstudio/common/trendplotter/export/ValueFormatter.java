@@ -7,63 +7,93 @@
  ******************************************************************************/
 package org.csstudio.common.trendplotter.export;
 
+import org.csstudio.archive.vtype.Style;
+import org.csstudio.archive.vtype.VTypeFormat;
+import org.csstudio.archive.vtype.VTypeHelper;
 import org.csstudio.common.trendplotter.Messages;
 import org.csstudio.data.values.IValue;
 import org.csstudio.data.values.IValue.Format;
+import org.epics.vtype.VStatistics;
+import org.epics.vtype.VType;
 
 /** Format an IValue as default, decimal, ...
  *  @author Kay Kasemir
  */
 public class ValueFormatter
 {
-    final private Format format;
-    final private int precision;
+    private boolean min_max_column = false;
+    private VTypeFormat format = null;
 
     /** Initialize
-     *  @param format Number format to use
+     *  @param style Number style to use
      *  @param precision Precision
      */
-    public ValueFormatter(final Format format, final int precision)
+    public ValueFormatter(final Style style, final int precision)
     {
-        this.format = format;
-        this.precision = precision;
+        this.format = Style.getFormat(style, precision);
+    }
+
+    /** @param min_max_column Display min/max info in separate column? */
+    public void useMinMaxColumn(final boolean min_max_column)
+    {
+        this.min_max_column = min_max_column;
     }
 
     /** @return Text for column headers */
     public String getHeader()
     {
-        return Messages.ValueColumn;
+        if (min_max_column)
+            return Messages.ValueColumn +
+                   Messages.Export_Delimiter + Messages.NegErrColumn +
+                   Messages.Export_Delimiter + Messages.PosErrColumn;
+        else
+            return Messages.ValueColumn;
     }
 
     /** @return Value formatted into columns */
-    public String format(final IValue value)
+    public String format(final VType value)
     {
-        if (value == null)
-            return Messages.Export_NoValueMarker;
-        // TODO Find a way to show full arrays, not just "1, 2, 3, ...."
-        return value.format(format, precision);
+        if (Double.isNaN(VTypeHelper.toDouble(value)))
+        {
+            if (min_max_column)
+                return Messages.Export_NoValueMarker +
+                       Messages.Export_Delimiter + Messages.Export_NoValueMarker +
+                       Messages.Export_Delimiter + Messages.Export_NoValueMarker;
+            else
+                return Messages.Export_NoValueMarker;
+        }
+
+        final VStatistics stats = (value instanceof VStatistics) ? (VStatistics) value : null;
+        
+        final StringBuilder buf = new StringBuilder();
+        if (stats != null)
+            // Show only the average, since min/max handled separately
+            format.format(stats.getAverage(), stats, buf);
+        else
+            format.format(value, buf);
+        // Optional min, max
+        if (min_max_column)
+        {
+            buf.append(Messages.Export_Delimiter);
+            if (stats != null)
+            {   // Turn min..max into negative & positive error
+                buf.append(stats.getAverage() - stats.getMin());
+                buf.append(Messages.Export_Delimiter);
+                buf.append(stats.getMax() - stats.getAverage());
+            }
+            else
+            {
+                buf.append(0);
+                buf.append(Messages.Export_Delimiter);
+                buf.append(0);
+            }
+        }
+        return buf.toString();
     }
 
     @Override
     public String toString()
     {
-        switch (format)
-        {
-        case Default:
-            return Messages.Format_Default;
-        case Decimal:
-            return nameWithPrecision(Messages.Format_Decimal);
-        case Exponential:
-            return nameWithPrecision(Messages.Format_Exponential);
-        default:
-            return format.name();
-        }
-    }
-
-    /** @return name of format with info on 'digits' */
-    @SuppressWarnings("nls")
-    private String nameWithPrecision(final String name)
-    {
-        return name + " (" + precision + " digits)";
+        return format.toString();
     }
 }
