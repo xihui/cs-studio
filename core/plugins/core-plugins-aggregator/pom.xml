@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.csstudio.core</groupId>
+	<artifactId>parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<modules>
+	    <module>../org.antlr.runtime</module>
+		<module>../org.csstudio.data</module>
+		<module>../org.csstudio.csdata</module>
+		<module>../org.csstudio.csdata.test</module>
+		<module>../org.csstudio.dal</module>
+		<module>../org.csstudio.platform.libs.epics</module>
+		<module>../org.csstudio.ui.util</module>
+		<module>../org.csstudio.utility.pv</module>
+		<module>../org.csstudio.utility.pv.epics</module>
+		<module>../org.csstudio.utility.pv.epics.test</module>
+		<module>../org.csstudio.utility.pvmanager</module>
+		<module>../org.csstudio.utility.pvmanager.epics</module>
+		<module>../org.csstudio.utility.pvmanager.extra</module>
+		<module>../org.csstudio.utility.pvmanager.loc</module>
+		<module>../org.csstudio.utility.pvmanager.sim</module>
+		<module>../org.csstudio.utility.pvmanager.sys</module>
+		<module>../org.csstudio.utility.pvmanager.ui</module>
+		<module>../org.csstudio.utility.pvmanager.ui.toolbox</module>
+		<module>../org.csstudio.utility.pvmanager.vtype</module>
+		<module>../org.csstudio.utility.pvmanager.widgets</module>
+		<module>../org.csstudio.utility.pvmanager.widgets.test</module>
+		<module>../org.csstudio.utility.pv.simu</module>
+		<module>../org.csstudio.utility.pv.simu.test</module>
+		<module>../org.epics.util</module>
+		<module>../org.epics.vtype</module>
+		
+	</modules>
+
+	<properties>
+		<tycho-version>0.16.0</tycho-version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>helios</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/helios</url>
+		</repository>
+		
+		<repository>
+            <id>central</id>
+            <name>Maven Repository Switchboard</name>
+            <layout>default</layout>
+            <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+               <enabled>false</enabled>
+            </snapshots>
+        </repository>
+		
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+
