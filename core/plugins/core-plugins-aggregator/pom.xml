@@ -5,8 +5,9 @@
 	<artifactId>parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+
 	<modules>
-	    <module>../org.antlr.runtime</module>
+		<module>../org.antlr.runtime</module>
 		<module>../org.csstudio.data</module>
 		<module>../org.csstudio.csdata</module>
 		<module>../org.csstudio.csdata.test</module>
@@ -31,7 +32,7 @@
 		<module>../org.csstudio.utility.pv.simu.test</module>
 		<module>../org.epics.util</module>
 		<module>../org.epics.vtype</module>
-		
+
 	</modules>
 
 	<properties>
@@ -44,17 +45,17 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/releases/helios</url>
 		</repository>
-		
+
 		<repository>
-            <id>central</id>
-            <name>Maven Repository Switchboard</name>
-            <layout>default</layout>
-            <url>http://repo1.maven.org/maven2</url>
-            <snapshots>
-               <enabled>false</enabled>
-            </snapshots>
-        </repository>
-		
+			<id>central</id>
+			<name>Maven Repository Switchboard</name>
+			<layout>default</layout>
+			<url>http://repo1.maven.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
 	</repositories>
 
 	<build>
