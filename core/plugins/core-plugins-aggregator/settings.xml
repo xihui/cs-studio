@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<settings>
+	<mirrors>
+		<mirror>
+			<!--This sends everything else to /public -->
+			<id>nexus</id>
+			<mirrorOf>*</mirrorOf>
+			<url>http://majordomo.bds.com:8081/nexus/content/groups/public/</url>
+		</mirror>
+	</mirrors>
+
+
+	<servers>
+		<server>
+			<id>PrestoNexusRelease</id>
+			<username>deployment</username>
+			<password>password</password>
+		</server>
+		<server>
+			<id>PrestoNexusSnapshot</id>
+			<username>deployment</username>
+			<password>password</password>
+		</server>
+		<server>
+			<id>PBNexusRelease</id>
+			<username>deployment</username>
+			<password>password</password>
+		</server>
+		<server>
+			<id>PBNexusSnapshot</id>
+			<username>deployment</username>
+			<password>password</password>
+		</server>
+	</servers>
+
+	<profiles>
+		<profile>
+			<id>PrestoStandardProfile</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<repositories>
+				<!-- While the mirrorOf * sends all traffice to the Presto Nexus repository 
+					- defininging the specific repositories contained in nexus helps maven understand 
+					what they are used for and when they should be checked for updates. -->
+				<repository>
+					<id>PrestoNexusRelease</id>
+					<name>Presto Nexus Release Repository</name>
+					<releases>
+						<enabled>true</enabled>
+						<updatePolicy>never</updatePolicy>
+						<checksumPolicy>warn</checksumPolicy>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+						<updatePolicy>always</updatePolicy>
+						<checksumPolicy>warn</checksumPolicy>
+					</snapshots>
+					<url>
+						http://majordomo.bds.com:8081/nexus/content/repositories/releases/
+					</url>
+					<layout>default</layout>
+				</repository>
+				<repository>
+					<id>PrestoNexusSnapshot</id>
+					<name>Presto Nexus Snapshot Repository</name>
+					<releases>
+						<enabled>false</enabled>
+						<updatePolicy>never</updatePolicy>
+						<checksumPolicy>fail</checksumPolicy>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
+						<checksumPolicy>fail</checksumPolicy>
+					</snapshots>
+					<url>
+						http://majordomo.bds.com:8081/nexus/content/repositories/snapshots/
+					</url>
+					<layout>default</layout>
+				</repository>
+			</repositories>
+
+			<!-- Ensures that all plug-in searchs go to the Nexus repository as well -->
+			<pluginRepositories>
+				<pluginRepository>
+					<id>PrestoNexusPlugin</id>
+					<name>Presto Nexus Plug-In Repository</name>
+					<releases>
+						<enabled>true</enabled>
+						<updatePolicy>never</updatePolicy>
+						<checksumPolicy>fail</checksumPolicy>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
+						<checksumPolicy>fail</checksumPolicy>
+					</snapshots>
+					<url>
+						http://majordomo.bds.com:8081/nexus/content/groups/public/
+					</url>
+					<layout>default</layout>
+				</pluginRepository>
+			</pluginRepositories>
+
+			<properties>
+				<!-- LOCAL SERVER DETAILS: Use the following properties to configure 
+					your local WebSphere Application Server. websphere.home.dir - the base directory 
+					of your WebSphere runtime websphere.profile.name - the name of your active 
+					WebSphere profile websphere.username - username for admin console (if you 
+					have security enabled) websphere.password - password for admin console (if 
+					you have security enabled) -->
+				<websphere.home.dir>C:/Program Files/IBM/SDP/runtimes/base_v7/
+				</websphere.home.dir>
+				<websphere.profile.name>was70profile1</websphere.profile.name>
+				<websphere.username></websphere.username>
+				<websphere.password></websphere.password>
+				<!-- The websphere.deploy.dir property is no longer used. It is only 
+					left here for backwards compatibility in case any older scripts reference 
+					it. -->
+				<websphere.deploy.dir>C:/Program
+					Files/IBM/SDP/runtimes/base_v7/profiles/was70profile1/installedApps/L2LGDJL1Node02Cell/
+				</websphere.deploy.dir>
+			</properties>
+		</profile>
+	</profiles>
+
+	<pluginGroups>
+	  <pluginGroup>org.jvnet.hudson.tools</pluginGroup>
+	</pluginGroups>
+
+	<!-- Finally ensure that our profile is active. -->
+	<activeProfiles>
+		<activeProfile>PrestoStandardProfile</activeProfile>
+	</activeProfiles>
+
+</settings>

@@ -5,15 +5,15 @@
 	<artifactId>parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	
-        <parent>
-          <groupId>com.bds.presto.maven</groupId>
-          <artifactId>enterprise-pom</artifactId>
-          <version>1.0.2</version>
-        </parent>
 
-        <modules>
-	    <module>../org.antlr.runtime</module>
+	<parent>
+		<groupId>com.bds.presto.maven</groupId>
+		<artifactId>enterprise-pom</artifactId>
+		<version>1.0.2</version>
+	</parent>
+
+	<modules>
+		<module>../org.antlr.runtime</module>
 		<module>../org.csstudio.data</module>
 		<module>../org.csstudio.csdata</module>
 		<module>../org.csstudio.csdata.test</module>
@@ -38,7 +38,7 @@
 		<module>../org.csstudio.utility.pv.simu.test</module>
 		<module>../org.epics.util</module>
 		<module>../org.epics.vtype</module>
-		
+
 	</modules>
 
 	<properties>
@@ -51,17 +51,7 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/releases/helios</url>
 		</repository>
-		
-		<repository>
-            <id>central</id>
-            <name>Maven Repository Switchboard</name>
-            <layout>default</layout>
-            <url>http://repo1.maven.org/maven2</url>
-            <snapshots>
-               <enabled>false</enabled>
-            </snapshots>
-        </repository>
-		
+
 	</repositories>
 
 	<build>
@@ -71,6 +61,15 @@
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<pomDependencies>consider</pomDependencies>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
