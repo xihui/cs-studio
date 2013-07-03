@@ -19,7 +19,7 @@ import org.csstudio.opibuilder.pvmanager.PVManagerHelper;
  *  PVManager in BOY.
  *  @author Kay Kasemir, Xihui Chen
  */
-public class ValueUtil
+public class ValueUtild
 {
     /** @return Array length of the value. <code>1</code> for scalars. */
     public static int getSize(final IValue value)

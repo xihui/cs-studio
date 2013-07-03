@@ -13,9 +13,9 @@ import java.util.Map.Entry;
 
 import org.csstudio.opibuilder.model.AbstractWidgetModel;
 import org.csstudio.opibuilder.util.AlarmRepresentationScheme;
+import org.csstudio.simplepv.IPV;
+import org.csstudio.simplepv.IPVListener;
 import org.csstudio.ui.util.thread.UIBundlingThread;
-import org.csstudio.utility.pv.PV;
-import org.csstudio.utility.pv.PVListener;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.swt.widgets.Display;
 
@@ -29,17 +29,19 @@ import org.eclipse.swt.widgets.Display;
  */
 public class ConnectionHandler {
 
-	private final class PVConnectionListener implements PVListener {
-		public void pvValueUpdate(PV pv) {
-			widgetConnectionRecovered(pv);
-		}
+	private final class PVConnectionListener extends IPVListener.Stub {		
 
-		public void pvDisconnected(PV pv) {
-			markWidgetAsDisconnected(pv);
-		}
+		@Override
+		public void connectionChanged(IPV pv) {
+			if(pv.isConnected())
+				widgetConnectionRecovered(pv);
+			else
+				markWidgetAsDisconnected(pv);
+		}		
+	
 	}
 
-	private Map<String, PV> pvMap;
+	private Map<String, IPV> pvMap;
 	
 	/**
 	 * True if all PVs are connected.
@@ -73,7 +75,7 @@ public class ConnectionHandler {
 		figure = editpart.getFigure();
 		widgetModel = editpart.getWidgetModel();
 		this.display = editpart.getViewer().getControl().getDisplay();
-		pvMap = new HashMap<String, PV>();
+		pvMap = new HashMap<String, IPV>();
 		preTooltip = widgetModel.getRawTooltip();
 		originTooltip = preTooltip;
 		connected = true;
@@ -83,7 +85,7 @@ public class ConnectionHandler {
 	 * @param pvName name of the PV.
 	 * @param pv the PV object.
 	 */
-	public void addPV(final String pvName, final PV pv){
+	public void addPV(final String pvName, final IPV pv){
 		pvMap.put(pvName, pv);
 		markWidgetAsDisconnected(pv);
 		if(pvConnectionListener == null)
@@ -103,7 +105,7 @@ public class ConnectionHandler {
 	
 	private void refreshModelTooltip(){		
 		StringBuilder sb = new StringBuilder();
-		for(Entry<String, PV> entry : pvMap.entrySet()){
+		for(Entry<String, IPV> entry : pvMap.entrySet()){
 			if(!entry.getValue().isConnected()){
 				sb.append(entry.getKey() + " is disconnected.\n");
 			}
@@ -119,7 +121,7 @@ public class ConnectionHandler {
 	/**Mark a widget as disconnected.
 	 * @param pvName the name of the PV that is disconnected.
 	 */
-	protected void markWidgetAsDisconnected(PV pv){
+	protected void markWidgetAsDisconnected(IPV pv){
 		if(connected){
 			preTooltip = widgetModel.getRawTooltip();
 		}
@@ -141,13 +143,13 @@ public class ConnectionHandler {
 	/**Update the widget when a PV' connection is recovered.
 	 * @param pvName the name of the PV whose connection is recovered.
 	 */
-	protected void widgetConnectionRecovered(PV pv){		
+	protected void widgetConnectionRecovered(IPV pv){		
 		
 		if (connected)
 			return;		
 		boolean allConnected = true;
 		refreshModelTooltip();
-		for (PV pv2 : pvMap.values()) {
+		for (IPV pv2 : pvMap.values()) {
 			allConnected &= pv2.isConnected();
 		}
 		if (allConnected) {
@@ -173,7 +175,7 @@ public class ConnectionHandler {
 	/**
 	 * @return the map with all PVs. It is not allowed to change the Map.
 	 */
-	public Map<String, PV> getAllPVs() {
+	public Map<String, IPV> getAllPVs() {
 		return pvMap;
 	}
 	

@@ -1,9 +1,13 @@
-package org.csstudio.opibuilder.pvmanager;
+package org.csstudio.opibuilder.util;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.csstudio.opibuilder.preferences.PreferencesHelper;
-import org.csstudio.opibuilder.util.UpgradeUtil;
-import org.csstudio.utility.pv.PV;
-import org.csstudio.utility.pv.PVFactory;
+import org.csstudio.simplepv.AbstractPVFactory;
+import org.csstudio.simplepv.ExceptionHandler;
+import org.csstudio.simplepv.IPV;
+import org.csstudio.simplepv.SimplePVLayer;
 import org.eclipse.swt.widgets.Display;
 
 /**The factory to create a PV for BOY. It will create either Utility PV or PVManager PV
@@ -13,6 +17,18 @@ import org.eclipse.swt.widgets.Display;
  */
 public class BOYPVFactory{	
 	
+	/**
+	 * The default background thread for PV change event notification.
+	 */
+	private final static ExecutorService BOY_PV_THREAD = Executors
+			.newSingleThreadExecutor();
+	
+	private final static ExceptionHandler exceptionHandler = new ExceptionHandler() {
+		@Override
+		public void handleException(Exception ex) {
+			ErrorHandlerUtil.handleError("Error from pv connection layer: ", ex);
+		}
+	};
 
 	/**Create a PV. If it is using PV Manager, buffered all values is false and max update
 	 * rate is determined by GUI Refresh cycle. In RAP, this method should be called in UI thread. If not, please give the display
@@ -22,7 +38,7 @@ public class BOYPVFactory{
 	 * @throws Exception
 	 * @see {@link #createPV(String, boolean, int)}
 	 */
-	public static PV createPV(final String name) throws Exception {
+	public static IPV createPV(final String name) throws Exception {
 		return createPV(name, false);
 	}
 	
@@ -34,7 +50,7 @@ public class BOYPVFactory{
 	 * @throws Exception
 	 * @see {@link #createPV(String, boolean, int)}
 	 */
-	public static PV createPV(final String name, final boolean bufferAllValues) throws Exception{
+	public static IPV createPV(final String name, final boolean bufferAllValues) throws Exception{
 		return createPV(name, bufferAllValues, 
 				PreferencesHelper.getGUIRefreshCycle());
 	}
@@ -47,16 +63,18 @@ public class BOYPVFactory{
 	 * @return the PV
 	 * @throws Exception
 	 */
-	public static PV createPV(final String name, 
+	public static IPV createPV(final String name, 
 			final boolean bufferAllValues, final int updateDuration) throws Exception{
-		switch (PreferencesHelper.getPVConnectionLayer()) {
-		case PV_MANAGER:
-			return new PVManagerPV(name, bufferAllValues, updateDuration);
-		case UTILITY_PV:
-		default:
-			return PVFactory.createPV(UpgradeUtil.convertPMPVToUtilityPVName(name));			
-		}
-		
+
+			String pvConnectionLayer = PreferencesHelper.getPVConnectionLayer();
+			if(pvConnectionLayer == null || pvConnectionLayer.isEmpty())
+				throw new Exception("PV connection layer is not configured in preference.");
+			AbstractPVFactory pvFactory = SimplePVLayer.getPVFactory
+					(pvConnectionLayer);
+			if(pvFactory == null)
+				throw new Exception("No such PVFactory extension available: " + pvConnectionLayer);			
+			return pvFactory.createPV(
+					name, false, updateDuration, bufferAllValues,  BOY_PV_THREAD, exceptionHandler);	
 	}
 
 }

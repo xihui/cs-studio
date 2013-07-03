@@ -36,6 +36,7 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.ui.util.CustomMediaFactory;
 import org.csstudio.ui.util.thread.UIBundlingThread;
 import org.eclipse.draw2d.IFigure;
+import org.epics.vtype.VType;
 
 /**The XYGraph editpart
  * @author Xihui Chen
@@ -532,7 +533,7 @@ public class XYGraphEditPart extends AbstractPVWidgetEditPart {
 				dataProvider.setChronological(true);
 			break;
 		case XPV_VALUE:
-			if(newValue == null || !(newValue instanceof IValue))
+			if(newValue == null || !(newValue instanceof VType))
 				break;
 			IValue value = (IValue)newValue;
 			if(dataProvider.isConcatenate_data() && value instanceof PMObjectValue){
