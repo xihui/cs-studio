@@ -96,7 +96,7 @@ public class BufferingReadTester {
 				failMessage = "writeFinished should not be called";
 			}
 		};
-		pv.addPVListener(pvListener);
+		pv.addListener(pvListener);
 	}
 
 
@@ -142,10 +142,10 @@ public class BufferingReadTester {
 		assertTrue(updates - temp > 1);
 		//Test remove and add listener
 		temp=updates;
-		pv.removePVListener(pvListener);
+		pv.removeListener(pvListener);
 		Thread.sleep(3000);
 		assertEquals(temp, updates);
-		pv.addPVListener(pvListener);
+		pv.addListener(pvListener);
 		Thread.sleep(3000);
 		assertTrue(updates - temp > 3);
 		

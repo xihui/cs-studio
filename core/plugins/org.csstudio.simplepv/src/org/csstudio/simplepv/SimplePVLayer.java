@@ -15,8 +15,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
-/**The entry of simplepv layer. Clients should use this entry to
- * get the PV factory to create simple pv.
+/**The entry point of simplepv layer. Clients should use this entry to
+ * get the PV factory to create PVs.
  * @author Xihui Chen
  *
  */
@@ -26,21 +26,26 @@ public class SimplePVLayer {
 	
 	private static Map<String, AbstractPVFactory> factoryMap = new HashMap<String, AbstractPVFactory>(4);
 	
-	public static AbstractPVFactory getPVFactory(String factoryName) throws CoreException{
-		if(!factoryMap.containsKey(factoryName)){
-			AbstractPVFactory pvFactory = createPVFactory(factoryName);
-			factoryMap.put(factoryName, pvFactory);
+	/**Get a PV Factory from its ID.
+	 * @param pvFactoryId ID of the PV Factory extension.
+	 * @return the PV Factory.
+	 * @throws CoreException
+	 */
+	public static AbstractPVFactory getPVFactory(String pvFactoryId) throws CoreException{
+		if(!factoryMap.containsKey(pvFactoryId)){
+			AbstractPVFactory pvFactory = createPVFactory(pvFactoryId);
+			factoryMap.put(pvFactoryId, pvFactory);
 		}		
-		return factoryMap.get(factoryName);				
+		return factoryMap.get(pvFactoryId);				
 	}
 	
-	private static AbstractPVFactory createPVFactory(String factoryName) throws CoreException{
+	private static AbstractPVFactory createPVFactory(String pvFactoryID) throws CoreException{
 		IExtensionRegistry extReg = Platform.getExtensionRegistry();		
 		IConfigurationElement[] confElements = 
 				extReg.getConfigurationElementsFor(EXTPOINT_PVFACTORY);
 		for(IConfigurationElement element : confElements){
 			String name = element.getAttribute("id"); //$NON-NLS-1$
-			if(name.equals(factoryName)){
+			if(name.equals(pvFactoryID)){
 				Object object = element.createExecutableExtension("class"); //$NON-NLS-1$
 				if(object instanceof AbstractPVFactory){
 					return (AbstractPVFactory)object;
@@ -50,6 +55,9 @@ public class SimplePVLayer {
 		return null;		
 	}
 	
+	/**Get all available PV Factory extensions.
+	 * @return the IDs of all available PV Factory extensions.
+	 */
 	public static String[] getAllPVFactoryExtensions(){
 		IExtensionRegistry extReg = Platform.getExtensionRegistry();		
 		IConfigurationElement[] confElements = 

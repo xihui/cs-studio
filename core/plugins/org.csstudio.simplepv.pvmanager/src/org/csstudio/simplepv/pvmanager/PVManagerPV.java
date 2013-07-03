@@ -18,7 +18,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.csstudio.simplepv.IPV;
@@ -34,6 +36,7 @@ import org.epics.pvmanager.PVWriter;
 import org.epics.pvmanager.PVWriterConfiguration;
 import org.epics.pvmanager.PVWriterEvent;
 import org.epics.pvmanager.PVWriterListener;
+import org.epics.util.time.TimeDuration;
 import org.epics.vtype.VType;
 
 /**
@@ -114,7 +117,7 @@ public class PVManagerPV implements IPV {
 	}
 
 	@Override
-	public synchronized void addPVListener(final IPVListener listener) {
+	public synchronized void addListener(final IPVListener listener) {
 		final PVReaderListener<Object> pvReaderListener = new PVReaderListener<Object>() {
 
 			@Override
@@ -178,15 +181,11 @@ public class PVManagerPV implements IPV {
 		}
 	}
 
-	private void checkIfPVStarted() {
-		if (pvReader == null)
-			throw new IllegalStateException(NLS.bind("PVManagerPV {0} is not started yet.", name));
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<VType> getAllBufferedValues() throws Exception {
-		checkIfPVStarted();
+	public List<VType> getAllBufferedValues(){
+		if(pvReader == null)
+			return null;
 		Object obj = pvReader.getValue();
 		if (obj != null) {
 			if (!valueBuffered) {
@@ -199,7 +198,7 @@ public class PVManagerPV implements IPV {
 					return (List<VType>) obj;
 				}
 			}
-			throw new Exception("Unknown data type returned from PVManager.");
+			return null;
 		}
 		return null;
 	}
@@ -211,8 +210,9 @@ public class PVManagerPV implements IPV {
 
 	@Override
 	// This method should not be synchronized because it may cause deadlock.
-	public VType getValue() throws Exception {
-		checkIfPVStarted();
+	public VType getValue() {
+		if(pvReader == null)
+			return null;
 		Object obj = pvReader.getValue();
 		if (obj != null) {
 			if (!valueBuffered) {
@@ -225,7 +225,7 @@ public class PVManagerPV implements IPV {
 						return (VType) lastValue;
 				}
 			}
-			throw new Exception("Unknown data type returned from PVManager.");
+			return null;
 		}
 		return null;
 	}
@@ -238,15 +238,15 @@ public class PVManagerPV implements IPV {
 	 */
 	private synchronized void internalStart() {
 		if (valueBuffered) {
-			PVReaderConfiguration<List<Object>> pvReaderConfiguration = PVManager.read(
-					newValuesOf(channel(name))).notifyOn(notificationThread);
+			PVReaderConfiguration<List<VType>> pvReaderConfiguration = PVManager.read(
+					newValuesOf(channel(name, VType.class, VType.class))).notifyOn(notificationThread);
 			if (exceptionHandler != null) {
 				pvReaderConfiguration = pvReaderConfiguration.routeExceptionsTo(exceptionHandler);
 			}
 			pvReader = pvReaderConfiguration.maxRate(ofMillis(maxUpdateRate));
 		} else {
 			if (isFormula) {
-				PVReaderConfiguration<?> pvReaderConfiguration = PVManager.read(formula(name))
+				PVReaderConfiguration<VType> pvReaderConfiguration = PVManager.read(formula(name, VType.class))
 						.notifyOn(notificationThread);
 				if (exceptionHandler != null) {
 					pvReaderConfiguration = pvReaderConfiguration
@@ -255,7 +255,7 @@ public class PVManagerPV implements IPV {
 				pvReader = pvReaderConfiguration.maxRate(ofMillis(maxUpdateRate));
 
 			} else {
-				PVReaderConfiguration<?> pvReaderConfiguration = PVManager.read(channel(name))
+				PVReaderConfiguration<?> pvReaderConfiguration = PVManager.read(channel(name, VType.class, VType.class))
 						.notifyOn(notificationThread);
 				if (exceptionHandler != null) {
 					pvReaderConfiguration = pvReaderConfiguration
@@ -318,7 +318,7 @@ public class PVManagerPV implements IPV {
 	}
 
 	@Override
-	public synchronized void removePVListener(IPVListener listener) {
+	public synchronized void removeListener(IPVListener listener) {
 		if (readListenerMap.containsKey(listener)) {
 			if (pvReader != null)
 				pvReader.removePVReaderListener(readListenerMap.get(listener));
@@ -372,6 +372,34 @@ public class PVManagerPV implements IPV {
 		pvReader = null;
 		pvWriter = null;
 		startFlag.set(false);
+	}
+
+	@Override
+	public boolean setValue(Object value, int timeout) throws Exception {
+		final AtomicBoolean result=new AtomicBoolean();
+		final CountDownLatch latch = new CountDownLatch(1);
+		PVWriter<Object> pvWriter = PVManager.write(channel(name))
+				.timeout(TimeDuration.ofSeconds(timeout)).writeListener(
+						new PVWriterListener<Object>() {
+							@Override
+							public void pvChanged(PVWriterEvent<Object> event) {								
+								latch.countDown();
+								if(event.isWriteFailed()){
+									result.set(false);
+								}
+								if(event.isWriteSucceeded())
+									result.set(true);									
+							}
+						}).sync();
+		try {
+			if(latch.await(timeout, TimeUnit.SECONDS))
+				pvWriter.write(value);
+			else
+				throw new Exception(NLS.bind("Failed to connect to the PV in {0} seconds.", timeout));
+		}finally{
+			pvWriter.close();
+		}		
+		return result.get();				
 	}
 
 }

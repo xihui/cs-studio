@@ -89,7 +89,7 @@ public class BasicReadWriteTester {
 				System.out.println("Write Finished: " + isWriteSucceeded);
 			}
 		};
-		pv.addPVListener(pvListener);
+		pv.addListener(pvListener);
 	}
 
 
@@ -146,11 +146,11 @@ public class BasicReadWriteTester {
 		assertTrue(updates > temp);
 		//Test remove and add listener
 		temp=updates;
-		pv.removePVListener(pvListener);
+		pv.removeListener(pvListener);
 		pv.setValue(678);
 		Thread.sleep(1000);
 		assertEquals(temp, updates);
-		pv.addPVListener(pvListener);
+		pv.addListener(pvListener);
 		pv.setValue(678);
 		Thread.sleep(1000);
 		assertEquals(updates, temp +2);

@@ -91,7 +91,7 @@ public class BasicReadTester {
 				failMessage = "writeFinished should not be called";
 			}
 		};
-		pv.addPVListener(pvListener);
+		pv.addListener(pvListener);
 	}
 
 
@@ -135,12 +135,12 @@ public class BasicReadTester {
 		assertFalse(pv.isPaused());
 		Thread.sleep(3000);
 		assertTrue(updates - temp > 3);
-		//Test remove and add listener
+		//Test remove and add listener		
+		pv.removeListener(pvListener);
 		temp=updates;
-		pv.removePVListener(pvListener);
 		Thread.sleep(3000);
 		assertEquals(temp, updates);
-		pv.addPVListener(pvListener);
+		pv.addListener(pvListener);
 		Thread.sleep(3000);
 		assertTrue(updates - temp > 3);
 		

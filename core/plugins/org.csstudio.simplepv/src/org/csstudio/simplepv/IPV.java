@@ -16,7 +16,7 @@ import org.epics.vtype.ValueUtil;
 /**
  * A simple PV interface for common UI applications. <p>
  * <b>Note:</b> Implementations should make sure all methods are thread safe.
- * @author  Xihui Chen
+ * @author  Xihui Chen, Kay Kasemir
  */
 public interface IPV {
 
@@ -25,16 +25,17 @@ public interface IPV {
 	 * events of the PV in the given notify thread.
 	 * @param listener the listener
 	 */
-	public void addPVListener(IPVListener listener);
+	public void addListener(IPVListener listener);
 
 	/**
 	 * Get all values that were buffered in last update cycle that has values. If value is
 	 * not buffered, it should return a single item list that wraps {@link #getValue()}
 	 * 
-	 * @return all values buffered. It can be null.
-	 * @throws Exception on error.
+	 * @return all values buffered. Will be null if the PV is not started or connected.
+	 * It can also be null even the PV is connected. For example, 
+	 * the value is not a VType, not prepared yet or it has null as the initial value.
 	 */
-	public List<VType> getAllBufferedValues() throws Exception;
+	public List<VType> getAllBufferedValues();
 
 	/**
 	 * Get name of the PV.
@@ -42,18 +43,18 @@ public interface IPV {
 	 * @return name of the PV, cannot be null.
 	 */
 	public String getName();
-
+	
 	/**
-	 * Get the most recent value of the PV in last update cycle that has values.	 * 
+	 * Get the most recent value of the PV in last update cycle that has values. 
 	 * {@link VTypeHelper} and {@link ValueUtil} can be used to get the number
 	 * or string value, alarm, display, time stamp etc. from the {@link VType} value and
 	 * help to format the value.
 	 * 
-	 * @return value of the PV. It can be null even the PV is connected. For example, 
-	 * the value is not prepared yet or it has null as the initial value.
-	 * @throws Exception on error.
+	 * @return value of the PV. Will be null if the PV is not started or connected.
+	 * It can also be null even the PV is connected. For example, 
+	 * the value is not a VType, not prepared yet or it has null as the initial value.
 	 */
-	public VType getValue() throws Exception;
+	public VType getValue();
 
 	/**
 	 * Return true if all values during an update period should be buffered.
@@ -91,7 +92,7 @@ public interface IPV {
     /**Remove a pv listener.
      * @param listener the listener to be removed.
      */
-    public void removePVListener(IPVListener listener);
+    public void removeListener(IPVListener listener);
     
 	/**
 	 * Pause notifications while keep the connection.
@@ -102,13 +103,25 @@ public interface IPV {
 	 */
 	public void setPaused(boolean paused);
 	
-	/** Set PV to a given value asynchronously.
+	/** Set PV to a given value asynchronously. It will return immediately.
      *  Should accept number, number array,
      *  <code>String</code>, maybe more.
      *  @param value Value to write to the PV
      *  @throws Exception on error.
      */
     public void setValue(Object value) throws Exception;
+    
+    /**Set PV to a given value synchronously. It will block the current thread
+     * until write operation finished or timeout.
+    *  Should accept number, number array,
+    *  <code>String</code>, maybe more.
+    *  @param value Value to write to the PV
+    *  @param timeout timeout in millisecond for both pv connection and write operation, so 
+    *  in very rare case, it could take maximum 2*timeout ms for the timeout.  
+    *  @return true if write successful or false otherwise.
+    *  @throws Exception on error such as connection failed.
+    */
+    public boolean setValue(Object value, int timeout) throws Exception;
 	
     
     /**
