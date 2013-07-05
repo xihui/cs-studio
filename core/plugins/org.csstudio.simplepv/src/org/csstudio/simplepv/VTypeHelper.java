@@ -387,11 +387,13 @@ public class VTypeHelper {
 
 	/**Get wrapped array in the VNumberArray object. The wrapped array could be double[], 
 	 * float[], int[], long[], short[], byte[] etc.
-	 * @param obj the {@link VNumberArray} object.
+	 * @param obj the {@link VType} object.
 	 * @return the wrapped array or null if no array is wrapped in the object.
 	 */
-	public static Object getWrappedArray(VNumberArray obj) {		
-		return CollectionNumbers.wrappedArray(obj.getData());
+	public static Object getWrappedArray(VType obj) {
+		if(obj instanceof VNumberArray)
+			return CollectionNumbers.wrappedArray(((VNumberArray) obj).getData());
+		return null;
 	}
 
 	/**Is an object primary array
