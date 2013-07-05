@@ -11,7 +11,6 @@ package org.csstudio.opibuilder.scriptUtil;
 import org.csstudio.opibuilder.editparts.AbstractBaseEditPart;
 import org.csstudio.opibuilder.util.BOYPVFactory;
 import org.csstudio.opibuilder.widgetActions.WritePVAction;
-import org.csstudio.simplepv.FormatEnum;
 import org.csstudio.simplepv.IPV;
 import org.csstudio.simplepv.VTypeHelper;
 import org.eclipse.gef.EditPart;

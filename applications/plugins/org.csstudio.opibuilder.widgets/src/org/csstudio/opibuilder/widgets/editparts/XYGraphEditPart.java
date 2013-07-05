@@ -12,18 +12,17 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.csstudio.data.values.IValue;
 import org.csstudio.opibuilder.dnd.DropPVtoPVWidgetEditPolicy;
 import org.csstudio.opibuilder.editparts.AbstractPVWidgetEditPart;
 import org.csstudio.opibuilder.properties.IWidgetPropertyChangeHandler;
-import org.csstudio.opibuilder.pvmanager.PMObjectValue;
 import org.csstudio.opibuilder.util.ConsoleService;
 import org.csstudio.opibuilder.util.OPIColor;
 import org.csstudio.opibuilder.util.OPIFont;
 import org.csstudio.opibuilder.widgets.model.XYGraphModel;
 import org.csstudio.opibuilder.widgets.model.XYGraphModel.AxisProperty;
 import org.csstudio.opibuilder.widgets.model.XYGraphModel.TraceProperty;
-import org.csstudio.platform.data.ValueUtil;
+import org.csstudio.simplepv.IPV;
+import org.csstudio.simplepv.VTypeHelper;
 import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider;
 import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider.PlotMode;
 import org.csstudio.swt.xygraph.dataprovider.CircularBufferDataProvider.UpdateMode;
@@ -36,6 +35,7 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.ui.util.CustomMediaFactory;
 import org.csstudio.ui.util.thread.UIBundlingThread;
 import org.eclipse.draw2d.IFigure;
+import org.epics.util.time.Timestamp;
 import org.epics.vtype.VType;
 
 /**The XYGraph editpart
@@ -104,12 +104,15 @@ public class XYGraphEditPart extends AbstractPVWidgetEditPart {
 					new  CircularBufferDataProvider(false)));
 			if(i<model.getTracesAmount())
 					xyGraph.addTrace(traceList.get(i));
-
+			String xPVPropID = XYGraphModel.makeTracePropID(
+					TraceProperty.XPV.propIDPre, i);
+			String yPVPropID = XYGraphModel.makeTracePropID(
+					TraceProperty.YPV.propIDPre, i);
 			for(TraceProperty traceProperty : TraceProperty.values()){
 				String propID = XYGraphModel.makeTracePropID(
 					traceProperty.propIDPre, i);
 				setTraceProperty(traceList.get(i), traceProperty,
-						model.getProperty(propID).getPropertyValue());
+						model.getProperty(propID).getPropertyValue(), xPVPropID, yPVPropID);
 			}
 		}
 		//all values should be buffered
@@ -436,10 +439,14 @@ public class XYGraphEditPart extends AbstractPVWidgetEditPart {
 		for(int i=0; i<XYGraphModel.MAX_TRACES_AMOUNT; i++){
 			boolean concatenate = (Boolean) getWidgetModel().getProperty(
 					XYGraphModel.makeTracePropID(TraceProperty.CONCATENATE_DATA.propIDPre, i)).getPropertyValue();
+			String xPVPropID = XYGraphModel.makeTracePropID(
+					TraceProperty.XPV.propIDPre, i);
+			String yPVPropID = XYGraphModel.makeTracePropID(
+					TraceProperty.YPV.propIDPre, i);
 			for(TraceProperty traceProperty : TraceProperty.values()){
 				String propID = XYGraphModel.makeTracePropID(
 					traceProperty.propIDPre, i);
-				final IWidgetPropertyChangeHandler handler = new TracePropertyChangeHandler(i, traceProperty);
+				final IWidgetPropertyChangeHandler handler = new TracePropertyChangeHandler(i, traceProperty, xPVPropID, yPVPropID);
 
 				if(concatenate){
 					//cannot use setPropertyChangeHandler because the PV value has to be buffered
@@ -449,7 +456,8 @@ public class XYGraphEditPart extends AbstractPVWidgetEditPart {
 							UIBundlingThread.getInstance().addRunnable(
 									getViewer().getControl().getDisplay(), new Runnable() {
 								public void run() {
-									handler.handleChange(
+									if(isActive())
+										handler.handleChange(
 											evt.getOldValue(), evt.getNewValue(), getFigure());
 									}
 							});
@@ -469,7 +477,7 @@ public class XYGraphEditPart extends AbstractPVWidgetEditPart {
 		}
 	}
 
-	private void setTraceProperty(Trace trace, TraceProperty traceProperty, Object newValue){
+	private void setTraceProperty(Trace trace, TraceProperty traceProperty, Object newValue, String xPVPropID, String yPVPropID){
 		CircularBufferDataProvider dataProvider = (CircularBufferDataProvider)trace.getDataProvider();
 		switch (traceProperty) {
 		case ANTI_ALIAS:
@@ -534,25 +542,25 @@ public class XYGraphEditPart extends AbstractPVWidgetEditPart {
 			break;
 		case XPV_VALUE:
 			if(newValue == null || !(newValue instanceof VType))
-				break;
-			IValue value = (IValue)newValue;
-			if(dataProvider.isConcatenate_data() && value instanceof PMObjectValue){
-				for(Object o:((PMObjectValue)value).getAllValues()){
-					setXValue(dataProvider, new PMObjectValue(o, false));
+				break;			
+			if(dataProvider.isConcatenate_data()){
+				IPV pv = getPV(xPVPropID);
+				for(VType o:pv.getAllBufferedValues()){
+					setXValue(dataProvider, o);
 				}
 			}else
-				setXValue(dataProvider, value);
+				setXValue(dataProvider, (VType) newValue);
 			break;
 		case YPV_VALUE:
-			if(newValue == null || !(newValue instanceof IValue))
+			if(newValue == null || !(newValue instanceof VType))
 				break;
-			IValue y_value = (IValue)newValue;
-			if(dataProvider.isConcatenate_data() && y_value instanceof PMObjectValue){
-				for(Object o:((PMObjectValue)y_value).getAllValues()){
-					setYValue(trace, dataProvider, new PMObjectValue(o, false));
+			if(dataProvider.isConcatenate_data()){
+				IPV pv = getPV(yPVPropID);
+				for(VType o:pv.getAllBufferedValues()){
+					setYValue(trace, dataProvider, o);
 				}
 			}else
-				setYValue(trace, dataProvider, y_value);
+				setYValue(trace, dataProvider, (VType) newValue);
 			break;
 		case VISIBLE:
 			trace.setVisible((Boolean)newValue);
@@ -562,23 +570,24 @@ public class XYGraphEditPart extends AbstractPVWidgetEditPart {
 		}
 	}
 
-	private void setXValue(CircularBufferDataProvider dataProvider, IValue value) {
-		if(ValueUtil.getSize(value) > 1){
-			dataProvider.setCurrentXDataArray(ValueUtil.getDoubleArray(value));
+	private void setXValue(CircularBufferDataProvider dataProvider, VType value) {
+		if(VTypeHelper.getSize(value) > 1){
+			dataProvider.setCurrentXDataArray(VTypeHelper.getDoubleArray(value));
 		}else
-			dataProvider.setCurrentXData(ValueUtil.getDouble(value));
+			dataProvider.setCurrentXData(VTypeHelper.getDouble(value));
 	}
 
 	private void setYValue(Trace trace,
-			CircularBufferDataProvider dataProvider, IValue y_value) {
-		if(ValueUtil.getSize(y_value) == 1 && trace.getXAxis().isDateEnabled() && dataProvider.isChronological()){
-			long time = y_value.getTime().seconds() * 1000 + y_value.getTime().nanoseconds()/1000000;
-			dataProvider.setCurrentYData(ValueUtil.getDouble(y_value), time);
+			CircularBufferDataProvider dataProvider, VType y_value) {
+		if(VTypeHelper.getSize(y_value) == 1 && trace.getXAxis().isDateEnabled() && dataProvider.isChronological()){
+			Timestamp timestamp = VTypeHelper.getTimestamp(y_value);
+			long time = timestamp.getSec() * 1000 + timestamp.getNanoSec()/1000000;
+			dataProvider.setCurrentYData(VTypeHelper.getDouble(y_value), time);
 		}else{
-			if(ValueUtil.getSize(y_value) > 1){
-				dataProvider.setCurrentYDataArray(ValueUtil.getDoubleArray(y_value));
+			if(VTypeHelper.getSize(y_value) > 1){
+				dataProvider.setCurrentYDataArray(VTypeHelper.getDoubleArray(y_value));
 			}else
-				dataProvider.setCurrentYData(ValueUtil.getDouble(y_value));
+				dataProvider.setCurrentYData(VTypeHelper.getDouble(y_value));
 		}
 	}
 
@@ -600,14 +609,18 @@ public class XYGraphEditPart extends AbstractPVWidgetEditPart {
 	class TracePropertyChangeHandler implements IWidgetPropertyChangeHandler {
 		private int traceIndex;
 		private TraceProperty traceProperty;
-		public TracePropertyChangeHandler(int traceIndex, TraceProperty traceProperty) {
+		private String xPVPropID;
+		private String yPVPropID;
+		public TracePropertyChangeHandler(int traceIndex, TraceProperty traceProperty, String xPVPropID, String yPVPropID) {
 			this.traceIndex = traceIndex;
 			this.traceProperty = traceProperty;
+			this.xPVPropID = xPVPropID;
+			this.yPVPropID = yPVPropID;
 		}
 		public boolean handleChange(Object oldValue, Object newValue,
 				IFigure refreshableFigure) {
 			Trace trace = traceList.get(traceIndex);
-			setTraceProperty(trace, traceProperty, newValue);
+			setTraceProperty(trace, traceProperty, newValue, xPVPropID, yPVPropID);
 			return false;
 		}
 	}

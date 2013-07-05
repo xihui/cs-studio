@@ -135,7 +135,6 @@ public class ConnectionHandler {
 		UIBundlingThread.getInstance().addRunnable(display, new Runnable(){
 			public void run() {
 				figure.setBorder(AlarmRepresentationScheme.getDisonnectedBorder());
-				figure.repaint();
 			}
 		});		
 	}

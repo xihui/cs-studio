@@ -113,11 +113,11 @@ public abstract class AbstractMarkedWidgetEditPart extends AbstractScaledWidgetE
 											model.setPropertyValue(AbstractMarkedWidgetModel.PROP_SHOW_LO, true);
 											model.setPropertyValue(AbstractMarkedWidgetModel.PROP_LO_LEVEL,	meta.getLowerWarningLimit());
 										}
-										if(Double.isNaN(meta.getLowerWarningLimit()))
+										if(Double.isNaN(meta.getLowerAlarmLimit()))
 											model.setPropertyValue(AbstractMarkedWidgetModel.PROP_SHOW_LOLO, false);
 										else{
 											model.setPropertyValue(AbstractMarkedWidgetModel.PROP_SHOW_LOLO, true);
-											model.setPropertyValue(AbstractMarkedWidgetModel.PROP_LOLO_LEVEL,	meta.getLowerWarningLimit());
+											model.setPropertyValue(AbstractMarkedWidgetModel.PROP_LOLO_LEVEL,	meta.getLowerAlarmLimit());
 										}
 									}
 								}

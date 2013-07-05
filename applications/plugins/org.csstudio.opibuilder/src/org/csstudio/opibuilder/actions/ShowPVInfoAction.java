@@ -108,28 +108,27 @@ public class ShowPVInfoAction implements IObjectActionDelegate {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("Name: " + pv.getName() + "\n"); //$NON-NLS-2$
-		sb.append("Value: " + pv.getValue() + "\n");
 		sb.append("State: " + stateInfo + "\n"); //$NON-NLS-2$
 		if(pv.getValue() != null){
 			sb.append((pv.isConnected()? "Value: " : "Last received value: ") + pv.getValue()+ "\n"); //$NON-NLS-2$
-			sb.append("Display Info:");
+			sb.append("Display Info: ");
 			Display displayInfo = VTypeHelper.getDisplayInfo(pv.getValue());
 			if(displayInfo != null){
 				sb.append("\nUnits: ");
 				sb.append(displayInfo.getUnits());
-				sb.append("\nPrecision:");
+				sb.append("\nPrecision: ");
 				sb.append(displayInfo.getFormat().getMaximumFractionDigits());
-				sb.append("\nDisplay_Low:");
+				sb.append("\nDisplay_Low: ");
 				sb.append(displayInfo.getLowerDisplayLimit());
-				sb.append("\nDisplay_High:");
+				sb.append("\nDisplay_High :");
 				sb.append(displayInfo.getUpperDisplayLimit());
-				sb.append("\nAlarm_Low:");
+				sb.append("\nAlarm_Low: ");
 				sb.append(displayInfo.getLowerAlarmLimit());
-				sb.append("\nWarning_Low:");
+				sb.append("\nWarning_Low: ");
 				sb.append(displayInfo.getLowerWarningLimit());
-				sb.append("\nWarning_High:");
+				sb.append("\nWarning_High: ");
 				sb.append(displayInfo.getUpperWarningLimit());
-				sb.append("\nAlarm_High:");
+				sb.append("\nAlarm_High: ");
 				sb.append(displayInfo.getUpperAlarmLimit());
 			}else
 				sb.append("null"); //$NON-NLS-1$
