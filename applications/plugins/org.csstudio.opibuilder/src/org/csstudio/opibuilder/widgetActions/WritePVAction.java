@@ -14,11 +14,11 @@ import org.csstudio.opibuilder.properties.PVNameProperty;
 import org.csstudio.opibuilder.properties.StringProperty;
 import org.csstudio.opibuilder.properties.WidgetPropertyCategory;
 import org.csstudio.opibuilder.scriptUtil.GUIUtil;
+import org.csstudio.opibuilder.util.BOYPVFactory;
 import org.csstudio.opibuilder.util.DisplayUtils;
 import org.csstudio.opibuilder.util.ErrorHandlerUtil;
 import org.csstudio.opibuilder.widgetActions.WidgetActionFactory.ActionType;
 import org.csstudio.simplepv.IPV;
-import org.csstudio.simplepv.SimplePVLayer;
 import org.csstudio.ui.util.thread.UIBundlingThread;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -118,8 +118,8 @@ public class WritePVAction extends AbstractWidgetAction {
 	private IStatus writePVInSync(){
 		String text = getValue().trim();		
 		try {
-			IPV pv = SimplePVLayer.getPVFactory("pvmanager").createPV(getPVName());
-			if(!pv.setValue(text, getTimeout()))
+			IPV pv = BOYPVFactory.createPV(getPVName());
+			if(!pv.setValue(text, getTimeout()*1000))
 				throw new Exception("Write Failed!");
 		} catch (Exception e) {
 			popErrorDialog(e);
