@@ -56,7 +56,9 @@ public class UtilityPV implements IPV {
 
 	private PV pv;
 
-	private Map<IPVListener, PVListener> listenerMap;	
+	private Map<IPVListener, PVListener> listenerMap;
+	private IValue lastIValue;
+	private VType lastVTypeValue;	
 	
 	final private static Map<Integer, NumberFormat> fmt_cache = 
 			new HashMap<Integer, NumberFormat>();
@@ -128,9 +130,16 @@ public class UtilityPV implements IPV {
 	}
 
 	@Override
-	public VType getValue() {
+	public synchronized VType getValue() {
 		IValue iValue = pv.getValue();		
-		return iValueToVType(iValue);
+		if(iValue!=null){
+			if(iValue == lastIValue)
+				return lastVTypeValue;			
+			lastVTypeValue = iValueToVType(iValue);
+			lastIValue = iValue;			
+			return lastVTypeValue;
+		}
+		return null;
 	}
 
 	private VType iValueToVType(IValue iValue) {

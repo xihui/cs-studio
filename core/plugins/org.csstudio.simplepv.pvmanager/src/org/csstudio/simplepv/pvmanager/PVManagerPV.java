@@ -136,7 +136,8 @@ public class PVManagerPV implements IPV {
 		readListenerMap.put(listener, pvReaderListener);
 		if (pvReader != null) {
 			// give an update on current value in PMPV thread.
-			if (!pvReader.isClosed() && pvReader.isConnected() && !pvReader.isPaused()) {
+			if (!pvReader.isClosed() && pvReader.isConnected() && !pvReader.isPaused() &&
+					pvReader.getValue() != null) {
 				notificationThread.execute(new Runnable() {
 					@Override
 					public void run() {
