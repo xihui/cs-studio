@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import org.csstudio.opibuilder.model.AbstractWidgetModel;
 import org.csstudio.opibuilder.util.AlarmRepresentationScheme;
+import org.csstudio.opibuilder.visualparts.BorderStyle;
 import org.csstudio.simplepv.IPV;
 import org.csstudio.simplepv.IPVListener;
 import org.csstudio.ui.util.thread.UIBundlingThread;
@@ -31,10 +32,22 @@ public class ConnectionHandler {
 
 	private final class PVConnectionListener extends IPVListener.Stub {		
 
+		private boolean lastValueIsNull;
+		
+		@Override
+		public void valueChanged(IPV pv) {
+			if(lastValueIsNull && pv.getValue()!=null){
+				lastValueIsNull = false;
+				widgetConnectionRecovered(pv, true);
+			}
+		}
+		
 		@Override
 		public void connectionChanged(IPV pv) {
-			if(pv.isConnected())
-				widgetConnectionRecovered(pv);
+			if(pv.isConnected()){				
+				lastValueIsNull = (pv.getValue()==null);
+				widgetConnectionRecovered(pv, false);				
+			}
 			else
 				markWidgetAsDisconnected(pv);
 		}		
@@ -61,11 +74,11 @@ public class ConnectionHandler {
 	private IFigure figure;
 	
 	private AbstractWidgetModel widgetModel;
-	private Display display;
-	
-	private PVConnectionListener pvConnectionListener;
+	private Display display;	
 	
 	protected AbstractBaseEditPart editPart;
+
+	private boolean hasNullValue;
 	
 	/**
 	 * @param editpart the widget editpart to be handled.
@@ -88,18 +101,13 @@ public class ConnectionHandler {
 	public void addPV(final String pvName, final IPV pv){
 		pvMap.put(pvName, pv);
 		markWidgetAsDisconnected(pv);
-		if(pvConnectionListener == null)
-			pvConnectionListener = new PVConnectionListener();
-		pv.addListener(pvConnectionListener);
+		pv.addListener(new PVConnectionListener());
 	}
 	
 	public void removePV(final String pvName){	
 		if(pvMap == null){
 			return;
-		}
-		if(pvMap.containsKey(pvName)){
-			pvMap.get(pvName).removeListener(pvConnectionListener);			
-		}
+		}		
 		pvMap.remove(pvName);
 	}
 	
@@ -108,6 +116,9 @@ public class ConnectionHandler {
 		for(Entry<String, IPV> entry : pvMap.entrySet()){
 			if(!entry.getValue().isConnected()){
 				sb.append(entry.getKey() + " is disconnected.\n");
+			}
+			if(entry.getValue().getValue() == null){
+				sb.append(entry.getKey() + " has null value.\n");
 			}
 		}		
 		if(sb.length()>0){
@@ -141,24 +152,29 @@ public class ConnectionHandler {
 	
 	/**Update the widget when a PV' connection is recovered.
 	 * @param pvName the name of the PV whose connection is recovered.
+	 * @param valueChangedFromNull true if this is called because value changed from null value.
 	 */
-	protected void widgetConnectionRecovered(IPV pv){		
+	protected void widgetConnectionRecovered(IPV pv, boolean valueChangedFromNull){		
 		
-		if (connected)
+		if (connected && !valueChangedFromNull)
 			return;		
 		boolean allConnected = true;
 		refreshModelTooltip();
+		hasNullValue = false;
 		for (IPV pv2 : pvMap.values()) {
 			allConnected &= pv2.isConnected();
+			hasNullValue |=(pv2.getValue()==null);
 		}
 		if (allConnected) {
 			connected = true;
 			UIBundlingThread.getInstance().addRunnable(display, new Runnable() {
 				public void run() {
+					if(hasNullValue)
+						figure.setBorder(
+								AlarmRepresentationScheme.getInvalidBorder(BorderStyle.DOTTED));
+					else
+						figure.setBorder(editPart.calculateBorder());
 
-					figure.setBorder(editPart.calculateBorder());
-
-					figure.repaint();
 				}
 			});
 		}
@@ -169,6 +185,13 @@ public class ConnectionHandler {
 	 */
 	public boolean isConnected() {
 		return connected;
+	}
+	
+	/**
+	 * @return true if one or some PVs have null values.
+	 */
+	public boolean isHasNullValue() {
+		return hasNullValue;
 	}
 
 	/**

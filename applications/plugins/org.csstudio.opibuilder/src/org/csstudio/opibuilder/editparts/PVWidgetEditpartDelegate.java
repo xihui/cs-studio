@@ -334,21 +334,10 @@ public class PVWidgetEditpartDelegate implements IPVWidgetEditpart {
 				if(newSeverity == null)
 					return false;			
 				
-				alarmSeverity = newSeverity;
-				
-				// Old value is not set. Force triggering listeners.
-				if (oldValue == null || !(oldValue instanceof VType)) {
+				if (newSeverity != alarmSeverity) {
+					alarmSeverity = newSeverity;
 					fireAlarmSeverityChanged(newSeverity, figure);
-					return true;
 				}
-
-				// Compare the old severity with the new severity.
-				// Trigger listeners only when they are different. 
-				AlarmSeverity oldSeverity =  VTypeHelper.getAlarmSeverity((VType) oldValue);
-				if (oldSeverity == newSeverity)
-					return false;
-					
-				fireAlarmSeverityChanged(newSeverity, figure);
 				return true;
 			}
 		};

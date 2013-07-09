@@ -891,8 +891,8 @@ public class ArrayEditPart extends AbstractContainerEditpart implements IPVWidge
 			return;
 		inSync = true;
 		if (!getUnSyncablePropIds().contains(propId)) {
-			for (AbstractWidgetModel child : getWidgetModel().getAllChildren()) {
-				child.setPropertyValue(propId, newValue);
+			for (Object child : getWidgetModel().getAllChildren().toArray()) {
+				((AbstractWidgetModel) child).setPropertyValue(propId, newValue);
 			}
 		}
 		if (propId.equals(AbstractWidgetModel.PROP_WIDTH)

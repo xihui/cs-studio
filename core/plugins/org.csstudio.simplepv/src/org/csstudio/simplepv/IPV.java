@@ -112,7 +112,8 @@ public interface IPV {
     public void setValue(Object value) throws Exception;
     
     /**Set PV to a given value synchronously. It will block the current thread
-     * until write operation finished or timeout.
+     * until write operation finished or timeout. It is not necessary to call {@link #start()}
+     * before calling this method, because it will handle the connection with timeout in this method.
     *  Should accept number, number array,
     *  <code>String</code>, maybe more.
     *  @param value Value to write to the PV

@@ -17,6 +17,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartListener;
 import org.epics.pvmanager.PV;
 import org.epics.util.time.Timestamp;
+import org.epics.util.time.TimestampFormat;
 import org.epics.vtype.AlarmSeverity;
 
 /**The utility class to facilitate Javascript programming
@@ -25,6 +26,8 @@ import org.epics.vtype.AlarmSeverity;
  *
  */
 public class PVUtil{
+	
+	private static final TimestampFormat timeFormat = new TimestampFormat("yyyy/MM/dd hh:mm:ss.SSS"); //$NON-NLS-1$
 	
 	/**Create a PV and start it. PVListener can be added to the PV to monitor its
 	 * value change, but please note that the listener is executed in non-UI thread.
@@ -195,7 +198,7 @@ public class PVUtil{
 		checkPVValue(pv);
 		Timestamp time = VTypeHelper.getTimestamp(pv.getValue());
 		if(time != null)
-			return time.toString();
+			return timeFormat.format(time);
 		return ""; //$NON-NLS-1$
 	}
 

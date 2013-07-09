@@ -34,12 +34,13 @@ public abstract class AbstractPVFactory {
 	 * If this is null, pv read listener or pv write listener will be notified on read or write exceptions respectively.
 	 * 
 	 * @return the PV.
+	 * @throws Exception error on creating pv.
 	 */
 	public abstract IPV createPV(final String name,
 			final boolean readOnly, final int maxUpdateRate,
 			final boolean bufferAllValues,
 			final Executor notificationThread,
-			final ExceptionHandler exceptionHandler);
+			final ExceptionHandler exceptionHandler) throws Exception;
 	
 	/**Create a PV with most of the parameters in default value:
 	 * <pre>
@@ -51,8 +52,9 @@ public abstract class AbstractPVFactory {
 	 * </pre>
 	 * @param name name of the PV. Must not be null.
 	 * @return the pv.
-	 */
-	public IPV createPV(final String name){
+	 * @throws Exception error on creating pv.
+ 	 */
+	public IPV createPV(final String name) throws Exception{
 		return createPV(name, false, 10, false, SIMPLE_PV_THREAD, null);
 	}
 

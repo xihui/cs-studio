@@ -20,7 +20,6 @@ import org.csstudio.simplepv.ExceptionHandler;
 import org.csstudio.simplepv.IPV;
 import org.csstudio.simplepv.IPVListener;
 import org.csstudio.simplepv.SimplePVLayer;
-import org.eclipse.core.runtime.CoreException;
 import org.epics.vtype.VType;
 
 /**
@@ -43,9 +42,9 @@ public class BufferingReadTester {
 	 * @param pvFactoryId pv factory id.
 	 * @param pvName pv name. The pv should be a read only pv that returns VType value that 
 	 * updates faster than 10hz. For example, sim://ramp(0,100,1,0.1)
-	 * @throws CoreException
+	 * @throws Exception 
 	 */
-	public BufferingReadTester(String pvFactoryId, String pvName) throws CoreException {
+	public BufferingReadTester(String pvFactoryId, String pvName) throws Exception {
 		updates = 0;
 		connected = false;
 		failMessage = null;
@@ -141,8 +140,9 @@ public class BufferingReadTester {
 		Thread.sleep(3000);
 		assertTrue(updates - temp > 1);
 		//Test remove and add listener
-		temp=updates;
 		pv.removeListener(pvListener);
+		Thread.sleep(1000);
+		temp=updates;
 		Thread.sleep(3000);
 		assertEquals(temp, updates);
 		pv.addListener(pvListener);

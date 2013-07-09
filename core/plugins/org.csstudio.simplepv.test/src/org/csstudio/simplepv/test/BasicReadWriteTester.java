@@ -19,7 +19,6 @@ import org.csstudio.simplepv.IPV;
 import org.csstudio.simplepv.IPVListener;
 import org.csstudio.simplepv.SimplePVLayer;
 import org.csstudio.simplepv.VTypeHelper;
-import org.eclipse.core.runtime.CoreException;
 import org.epics.vtype.VDouble;
 
 /**
@@ -40,9 +39,9 @@ public class BasicReadWriteTester {
 	/**Create a tester.
 	 * @param pvFactoryId pv factory id.
 	 * @param pvName pv name. The pv should be a writable pv. For example, loc://test(0)
-	 * @throws CoreException
+	 * @throws Exception 
 	 */
-	public BasicReadWriteTester(String pvFactoryId, String pvName) throws CoreException {
+	public BasicReadWriteTester(String pvFactoryId, String pvName) throws Exception {
 		updates = 0;
 		connected = false;
 		this.pvName = pvName;
@@ -154,6 +153,13 @@ public class BasicReadWriteTester {
 		pv.setValue(678);
 		Thread.sleep(1000);
 		assertEquals(updates, temp +2);
+		
+		//test sync write
+		temp=updates;
+		pv.setValue(890, 5000);
+		Thread.sleep(1000);
+		assertEquals(updates, temp+1);
+		assertEquals(890, VTypeHelper.getDouble(pv.getValue()), 0.1);
 		
 	}
 

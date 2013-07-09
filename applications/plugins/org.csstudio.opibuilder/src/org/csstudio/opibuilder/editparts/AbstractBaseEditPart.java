@@ -784,11 +784,13 @@ public abstract class AbstractBaseEditPart extends AbstractGraphicalEditPart imp
 	}
 	
 
-	/**Set border of the figure. It will consider the connection status.
+	/**Set border of the figure. If the border has been set for connection or null
+	 * value indication, the figure's border will not change.
 	 * @param border
 	 */
 	protected void setFigureBorder(Border border){
-		if(getConnectionHandler() != null && !getConnectionHandler().isConnected()){
+		if(getConnectionHandler() != null && (!getConnectionHandler().isConnected() ||
+				getConnectionHandler().isHasNullValue())){
 			return;
 		}
 		getFigure().setBorder(border);
