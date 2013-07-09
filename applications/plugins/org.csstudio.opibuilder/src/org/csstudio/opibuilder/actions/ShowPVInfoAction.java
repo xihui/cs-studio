@@ -132,6 +132,8 @@ public class ShowPVInfoAction implements IObjectActionDelegate {
 				sb.append(displayInfo.getUpperAlarmLimit());
 			}else
 				sb.append("null"); //$NON-NLS-1$
+		}else{
+			sb.append("Value: null");
 		}
 		return sb.toString();
 	}

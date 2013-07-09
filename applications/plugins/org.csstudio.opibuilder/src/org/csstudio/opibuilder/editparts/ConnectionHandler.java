@@ -7,9 +7,9 @@
  ******************************************************************************/
 package org.csstudio.opibuilder.editparts;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.csstudio.opibuilder.model.AbstractWidgetModel;
 import org.csstudio.opibuilder.util.AlarmRepresentationScheme;
@@ -88,7 +88,7 @@ public class ConnectionHandler {
 		figure = editpart.getFigure();
 		widgetModel = editpart.getWidgetModel();
 		this.display = editpart.getViewer().getControl().getDisplay();
-		pvMap = new HashMap<String, IPV>();
+		pvMap = new ConcurrentHashMap<String, IPV>();
 		preTooltip = widgetModel.getRawTooltip();
 		originTooltip = preTooltip;
 		connected = true;
@@ -116,8 +116,7 @@ public class ConnectionHandler {
 		for(Entry<String, IPV> entry : pvMap.entrySet()){
 			if(!entry.getValue().isConnected()){
 				sb.append(entry.getKey() + " is disconnected.\n");
-			}
-			if(entry.getValue().getValue() == null){
+			}else if(entry.getValue().getValue() == null){
 				sb.append(entry.getKey() + " has null value.\n");
 			}
 		}		

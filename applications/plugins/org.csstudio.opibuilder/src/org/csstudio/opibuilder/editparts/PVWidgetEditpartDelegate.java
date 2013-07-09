@@ -624,19 +624,23 @@ public class PVWidgetEditpartDelegate implements IPVWidgetEditpart {
 				UIBundlingThread.getInstance().addRunnable(
 						editpart.getViewer().getControl().getDisplay(),new Runnable(){
 					public void run() {
-						if(editpart.getFigure().getCursor() == Cursors.NO)
-							editpart.getFigure().setCursor(savedCursor);
-						editpart.getFigure().setEnabled(widgetModel.isEnabled());	
+						IFigure figure = editpart.getFigure();
+						if(figure.getCursor() == Cursors.NO)
+							figure.setCursor(savedCursor);
+						figure.setEnabled(widgetModel.isEnabled());	
+						figure.repaint();
 					}
 				});
 			}else{
 				UIBundlingThread.getInstance().addRunnable(
 						editpart.getViewer().getControl().getDisplay(),new Runnable(){
 					public void run() {
-						if(editpart.getFigure().getCursor() != Cursors.NO)
-							savedCursor = editpart.getFigure().getCursor();
-						editpart.getFigure().setEnabled(false);
-						editpart.getFigure().setCursor(Cursors.NO);							
+						IFigure figure = editpart.getFigure();
+						if(figure.getCursor() != Cursors.NO)
+							savedCursor = figure.getCursor();
+						figure.setEnabled(false);
+						figure.setCursor(Cursors.NO);		
+						figure.repaint();
 					}
 				});
 			}
