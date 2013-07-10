@@ -346,7 +346,7 @@ public class PVManagerPV implements IPV {
 			throw new Exception(NLS.bind("The PV {0} is a formula which is not allowed to write.",
 					getName()));
 		if (pvWriter == null || pvWriter.isClosed())
-			throw new Exception(NLS.bind("The PV {0} is not started yet.", getName()));
+			throw new Exception(NLS.bind("The PV {0} is not started yet or has been closed.", getName()));
 		pvWriter.write(new_value);
 	}
 

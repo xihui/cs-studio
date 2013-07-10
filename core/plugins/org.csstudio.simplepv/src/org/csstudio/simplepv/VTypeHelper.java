@@ -180,33 +180,8 @@ public class VTypeHelper {
 	 * @return double or NaN if no double value is available in the object.
 	 */
 	public static double getDouble(final VType obj) {
-		if (obj instanceof VNumber) {
-			Number value = ((VNumber) obj).getValue();
-			if (value != null) {
-				return value.doubleValue();
-			}
-		}
-		if (obj instanceof VEnum) {
-			return (double) ((VEnum) obj).getIndex();
-		}
-		if (obj instanceof VNumberArray) {
-			ListNumber data = ((VNumberArray) obj).getData();
-			if (data != null && data.size() != 0) {
-				return data.getDouble(0);
-			}
-		}
-		if (obj instanceof VEnumArray) {
-			ListNumber data = ((VEnumArray) obj).getIndexes();
-			if (data != null && data.size() != 0) {
-				return data.getDouble(0);
-			}
-		}
-		if (obj instanceof MultiScalar) {
-			List<?> values = ((MultiScalar<?>) obj).getValues();
-			if (!values.isEmpty())
-				return getDouble((VType) values.get(0));
-		}
-		return Double.NaN;
+		Double value = ValueUtil.numericValueOf(obj);
+		return value==null? Double.NaN:value;
 	}
 
 	/**
