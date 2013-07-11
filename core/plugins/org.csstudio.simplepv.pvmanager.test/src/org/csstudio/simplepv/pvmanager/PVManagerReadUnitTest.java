@@ -15,8 +15,6 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,48 +22,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.csstudio.simplepv.AbstractPVFactory;
 import org.csstudio.simplepv.IPV;
 import org.csstudio.simplepv.IPVListener;
-import org.epics.pvmanager.CompositeDataSource;
-import org.epics.pvmanager.PVManager;
-import org.epics.pvmanager.sim.SimulationDataSource;
+import org.csstudio.simplepv.SimplePVLayer;
 import org.epics.vtype.VType;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-/** Plain JUnit test for reading with PVManagerPVFactory
+/** JUnit test for reading with PVManagerPVFactory
+ * 
+ *  <p>Directly accesses PVManagerPVFactory to run as plain JUnit test.
+ *  CSS code should use {@link SimplePVLayer}
  *  @author Kay Kasemir
  */
-public class PVManagerReadUnitTest
+public class PVManagerReadUnitTest extends TestHelper
 {
-    final private ExecutorService THREAD = Executors.newSingleThreadExecutor();
-    final private AbstractPVFactory factory = new PVManagerPVFactory();
-        
     final private AtomicInteger connections = new AtomicInteger();
     final private AtomicInteger changes = new AtomicInteger();
     private volatile Exception error = null;
-    
-    @Before
-    public void setup()
-    {
-        final CompositeDataSource sources = new CompositeDataSource();
-        sources.putDataSource("sim", new SimulationDataSource());
-        sources.setDefaultDataSource("sim");
-        PVManager.setDefaultDataSource(sources);
-    }
-
-    @After
-    public void shutdown() throws Exception
-    {
-        THREAD.shutdown();
-        THREAD.awaitTermination(1, TimeUnit.SECONDS);
-    }
     
     @Test
     public void testBasicReading() throws Exception
     {
         final boolean readonly = true;
         final boolean buffer = false;
-        final IPV pv = factory.createPV("sim://ramp", readonly, 10, buffer, THREAD, null);
+        final IPV pv = factory.createPV("sim://ramp", readonly, 10, buffer,
+                AbstractPVFactory.getDefaultPVNotificationThread(), null);
         pv.addListener(new IPVListener()
         {
             @Override
@@ -142,7 +121,8 @@ public class PVManagerReadUnitTest
     {
         final boolean readonly = true;
         final boolean buffer = true;
-        final IPV pv = factory.createPV("sim://ramp", readonly, (int)TimeUnit.SECONDS.toMillis(2), buffer, THREAD, null);
+        final IPV pv = factory.createPV("sim://ramp", readonly, (int)TimeUnit.SECONDS.toMillis(2),
+                    buffer, AbstractPVFactory.getDefaultPVNotificationThread(), null);
         
         final AtomicBoolean got_multiples = new AtomicBoolean();
         
@@ -191,17 +171,14 @@ public class PVManagerReadUnitTest
                 error = new Exception("Received write permission change");
             }
         });
-
         
         pv.start();
-        assertThat(pv.isStarted(), equalTo(true));
 
         // Expect about 1 update per second, so wait for ~5 values
         TimeUnit.SECONDS.sleep(5);
         
+        // Should have connected and received a bunch of values...
         assertThat(pv.isConnected(), equalTo(true));
-
-        // Should see a bunch of values...
         synchronized (values)
         {
             System.out.println(values);
