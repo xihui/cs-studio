@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.csstudio.simplepv.ExceptionHandler;
 import org.csstudio.simplepv.IPV;
@@ -32,7 +33,7 @@ import org.epics.vtype.VType;
 public class BufferingReadTester {
 
 	private IPV pv;
-	private int updates;
+	private AtomicInteger updates;
 	private volatile boolean connected;
 	private String failMessage;
 	private String pvName;
@@ -45,7 +46,7 @@ public class BufferingReadTester {
 	 * @throws Exception 
 	 */
 	public BufferingReadTester(String pvFactoryId, String pvName) throws Exception {
-		updates = 0;
+		updates = new AtomicInteger(0);
 		connected = false;
 		failMessage = null;
 		this.pvName = pvName;
@@ -63,12 +64,12 @@ public class BufferingReadTester {
 				try {
 					List<VType> allValues = pv.getAllBufferedValues();
 					if (allValues != null && allValues.size() >8) {
-						updates++;
+						updates.incrementAndGet();
 					}					
 					if(allValues == null)
 						System.err.println("Got null values. getValue()= " + pv.getValue());
 					else
-						System.out.println("value " + updates + ": " +
+						System.out.println("value " + updates.get() + ": " +
 								allValues.size() + " values: " + allValues.get(0) + " " + allValues.get(1));
 					
 				} catch (Exception e) {
@@ -127,27 +128,27 @@ public class BufferingReadTester {
 	protected void testRead() throws Exception {
 		Thread.sleep(10000);
 		assertTrue(connected);
-		assertTrue(updates > 8);
+		assertTrue(updates.get() > 8);
 		// Test pausing
 		pv.setPaused(true);
 		assertTrue(pv.isPaused());
-		int temp = updates;
+		int temp = updates.get();
 		Thread.sleep(3000);
-		assertEquals(temp, updates);
+		assertEquals(temp, updates.get());
 		// Test resuming
 		pv.setPaused(false);
 		assertFalse(pv.isPaused());
 		Thread.sleep(3000);
-		assertTrue(updates - temp > 1);
+		assertTrue(updates.get() - temp > 1);
 		//Test remove and add listener
 		pv.removeListener(pvListener);
 		Thread.sleep(1000);
-		temp=updates;
+		temp=updates.get();
 		Thread.sleep(3000);
-		assertEquals(temp, updates);
+		assertEquals(temp, updates.get());
 		pv.addListener(pvListener);
 		Thread.sleep(3000);
-		assertTrue(updates - temp > 3);
+		assertTrue(updates.get() - temp > 3);
 		
 		// Test reading buffered values
 		assertTrue(pv.getAllBufferedValues() instanceof List<?>);
@@ -173,9 +174,9 @@ public class BufferingReadTester {
 			i++;
 		}
 		System.out.println("It took " + i * 100 + "ms to disconnect.");
-		int temp = updates;
+		int temp = updates.get();
 		Thread.sleep(3000);
-		assertEquals(temp, updates);
+		assertEquals(temp, updates.get());
 		assertEquals(false, pv.isConnected());
 
 		// test if it can be restarted again.
@@ -187,7 +188,7 @@ public class BufferingReadTester {
 //		}
 //		System.out.println("It took " + i * 100 + "ms to connect.");	
 		Thread.sleep(3000);
-		assertTrue(updates > temp);
+		assertTrue(updates.get() > temp);
 		pv.stop();
 	}
 
