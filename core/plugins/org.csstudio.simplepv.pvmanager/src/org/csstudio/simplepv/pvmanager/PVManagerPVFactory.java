@@ -20,9 +20,9 @@ import org.csstudio.simplepv.IPV;
 public class PVManagerPVFactory extends AbstractPVFactory {
 
 	@Override
-	public IPV createPV(String name, boolean readOnly, int maxUpdateRate, boolean bufferAllValues,
+	public IPV createPV(String name, boolean readOnly, int minUpdatePeriod, boolean bufferAllValues,
 			Executor notificationThread, ExceptionHandler exceptionHandler) {
-		return new PVManagerPV(name, readOnly, maxUpdateRate, bufferAllValues, notificationThread, exceptionHandler);
+		return new PVManagerPV(name, readOnly, minUpdatePeriod, bufferAllValues, notificationThread, exceptionHandler);
 	}
 
 	

@@ -19,15 +19,16 @@ import java.util.concurrent.Executors;
 public abstract class AbstractPVFactory {	
 	
 	/**
-	 * The default background thread for PV change event notification.
+	 * The default background thread for PV change event notification. It will only be created 
+	 * on its first use.
 	 */
-	private final static ExecutorService SIMPLE_PV_THREAD = Executors
-			.newSingleThreadExecutor();
+	static ExecutorService SIMPLE_PV_THREAD = null;
 	
 	/**Create a PV.
 	 * @param name name of the PV. Must not be null.
 	 * @param readOnly true if the client doesn't need to write to the PV.
-	 * @param maxUpdateRate the maximum update rate in milliseconds.
+	 * @param minUpdatePeriod the minimum update period in milliseconds, 
+	 * which means the PV change event notification will not be faster than this period.
 	 * @param bufferAllValues if all value on the PV should be buffered during two updates.
 	 * @param notificationThread the thread on which the read and write listener will be notified. Must not be null.
 	 * @param exceptionHandler the handler to handle all exceptions happened in pv connection layer. 
@@ -37,7 +38,7 @@ public abstract class AbstractPVFactory {
 	 * @throws Exception error on creating pv.
 	 */
 	public abstract IPV createPV(final String name,
-			final boolean readOnly, final int maxUpdateRate,
+			final boolean readOnly, final int minUpdatePeriod,
 			final boolean bufferAllValues,
 			final Executor notificationThread,
 			final ExceptionHandler exceptionHandler) throws Exception;
@@ -45,17 +46,25 @@ public abstract class AbstractPVFactory {
 	/**Create a PV with most of the parameters in default value:
 	 * <pre>
 	 * readOnly = false;
-	 * maxUpdateRate = 10ms;
+	 * minUpdatePeriod = 10 ms;
 	 * bufferAllValues = false;
-	 * notificationThread = a background non-UI thread.
-	 * exptionHandler = null;
+	 * notificationThread = {@link #SIMPLE_PV_THREAD}
+	 * exceptionHandler = null;
 	 * </pre>
 	 * @param name name of the PV. Must not be null.
 	 * @return the pv.
 	 * @throws Exception error on creating pv.
  	 */
-	public IPV createPV(final String name) throws Exception{
+	public synchronized IPV createPV(final String name) throws Exception{		
+		if (SIMPLE_PV_THREAD == null)
+			SIMPLE_PV_THREAD = Executors.newSingleThreadExecutor();	
 		return createPV(name, false, 10, false, SIMPLE_PV_THREAD, null);
+	}
+	
+	public static synchronized ExecutorService getDefaultPVNotificationThread() {
+		if (SIMPLE_PV_THREAD == null)
+			SIMPLE_PV_THREAD = Executors.newSingleThreadExecutor();
+		return SIMPLE_PV_THREAD;
 	}
 
 }

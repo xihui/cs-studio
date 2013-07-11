@@ -28,7 +28,7 @@ public class UtilityPVFactory extends AbstractPVFactory {
 	 *  
 	 */
 	@Override
-	public IPV createPV(String name, boolean readOnly, int maxUpdateRate, boolean bufferAllValues,
+	public IPV createPV(String name, boolean readOnly, int minUpdatePeriod, boolean bufferAllValues,
 			Executor notificationThread, ExceptionHandler exceptionHandler) throws Exception {
 		return new UtilityPV(name, readOnly, notificationThread, exceptionHandler);
 	}
