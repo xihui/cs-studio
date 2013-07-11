@@ -38,6 +38,7 @@ public class PVManagerReadUnitTest extends TestHelper
     final private AtomicInteger changes = new AtomicInteger();
     private volatile Exception error = null;
     
+    /** Read 'latest' value */
     @Test
     public void testBasicReading() throws Exception
     {
@@ -116,6 +117,7 @@ public class PVManagerReadUnitTest extends TestHelper
         assertThat(error, is(nullValue()));
     }
 
+    /** Read 'all' value */
     @Test
     public void testBufferedReading() throws Exception
     {
