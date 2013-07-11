@@ -70,7 +70,7 @@ public class BufferingReadTester {
 						System.err.println("Got null values. getValue()= " + pv.getValue());
 					else
 						System.out.println("value " + updates.get() + ": " +
-								allValues.size() + " values: " + allValues.get(0) + " " + allValues.get(1));
+								allValues.size() + " values: " + allValues.get(0));
 					
 				} catch (Exception e) {
 					e.printStackTrace();

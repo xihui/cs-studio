@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
 
 import org.csstudio.data.values.IDoubleValue;
 import org.csstudio.data.values.IEnumeratedMetaData;
@@ -307,11 +308,19 @@ public class UtilityPV implements IPV {
 
 	@Override
 	public void start() throws Exception {
+		if(pv.isRunning())
+			throw new IllegalStateException(
+					NLS.bind("PV {0} has already been started.", getName()));
 		pv.start();
 	}
 
 	@Override
 	public void stop() {
+		if(!pv.isRunning()){
+			Activator.getLogger().log(Level.WARNING, 
+					NLS.bind("PV {0} has already been stopped or was not started yet.", getName()));
+			return;
+		}
 		pv.stop();
 	}
 	

@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 import org.csstudio.simplepv.IPV;
 import org.csstudio.simplepv.IPVListener;
@@ -122,6 +123,7 @@ public class PVManagerPV implements IPV {
 
 			@Override
 			public void pvChanged(PVReaderEvent<Object> event) {
+				System.out.println("read:"+event);
 				if (event != null) {
 					if (event.isConnectionChanged())
 						listener.connectionChanged(PVManagerPV.this);
@@ -153,6 +155,7 @@ public class PVManagerPV implements IPV {
 
 				@Override
 				public void pvChanged(PVWriterEvent<Object> event) {
+					System.out.println("write:"+event);
 					if (event == null || event.isConnectionChanged())
 						listener.writePermissionChanged(PVManagerPV.this);
 					if (event != null) {
@@ -360,12 +363,18 @@ public class PVManagerPV implements IPV {
 					internalStart();
 				}
 			});
-		} else if (pvReader != null)
-			pvReader.setPaused(false);
+		}else
+			throw new IllegalStateException(
+					NLS.bind("PV {0} has already been started.", getName()));
 	}
 
 	@Override
 	public void stop() {
+		if(!startFlag.get()){
+			Activator.getLogger().log(Level.WARNING, 
+					NLS.bind("PV {0} has already been stopped or was not started yet.", getName()));
+			return;
+		}		
 		if (pvReader != null)
 			pvReader.close();
 		if (pvWriter != null)

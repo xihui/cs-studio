@@ -14,7 +14,7 @@ import org.csstudio.simplepv.test.BufferingReadTester;
 import org.junit.Test;
 
 /**
- * Test simple PV Read functionalities.
+ * Test simple PV Read functionalities. It should run as plugin test.
  * 
  * @author Xihui Chen
  * 

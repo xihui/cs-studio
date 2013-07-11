@@ -126,7 +126,10 @@ public interface IPV {
 	
     
     /**
-	 * Start to connect and listen on the PV.
+	 * Start to connect and listen on the PV. 
+	 * To start an already started PV will get an {@link IllegalStateException}. 
+	 * @throws Exception on error.
+	 *  
 	 */
 	public void start() throws Exception;
     
@@ -135,7 +138,8 @@ public interface IPV {
 	 * but it is recommended to use {@link #setPaused(boolean)} instead of calling stop and start again 
 	 * because {@link #setPaused(boolean)} will keep the connection. 
 	 * When the PV is no longer needed, one should stop it
-	 * to release resources. It has no effect if the pv has been stopped already.
+	 * to release resources. To stop an already stopped PV or not started PV will do nothing but 
+	 * log a warning message. 
 	 */
 	public void stop();
 
