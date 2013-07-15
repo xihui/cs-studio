@@ -48,40 +48,40 @@
   </interface>  
   <class id="6" language="java" name="org.csstudio.simplepv.SimplePVLayer" project="org.csstudio.simplepv" 
     file="/org.csstudio.simplepv/src/org/csstudio/simplepv/SimplePVLayer.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="422" y="104"/>    
+    <position height="-1" width="-1" x="424" y="104"/>    
     <display autosize="true" stereotype="false" package="true" initial-value="true" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="false" static="true"/>      
       <operations public="true" package="true" protected="true" private="false" static="true"/>    
     </display>  
   </class>  
-  <association id="7">    
+  <dependency id="7">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <dependency id="8">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <association id="9">    
     <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="8" name="factoryMap"/>      
-      <multiplicity id="9" minimum="0" maximum="2147483647"/>    
+      <attribute id="10" name="factoryMap"/>      
+      <multiplicity id="11" minimum="0" maximum="2147483647"/>    
     </end>    
     <end type="TARGET" refId="1" navigable="true"/>    
     <display labels="false" multiplicity="true"/>  
   </association>  
-  <dependency id="10">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="2"/>  
-  </dependency>  
-  <dependency id="11">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="3"/>  
-  </dependency>  
   <dependency id="12">    
     <end type="SOURCE" refId="4"/>    
     <end type="TARGET" refId="5"/>  
   </dependency>  
   <dependency id="13">    
     <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="5"/>  
+    <end type="TARGET" refId="3"/>  
   </dependency>  
   <dependency id="14">    
-    <end type="SOURCE" refId="3"/>    
-    <end type="TARGET" refId="2"/>  
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="5"/>  
   </dependency>  
   <classifier-display autosize="true" stereotype="false" package="true" initial-value="true" signature="true" 
     accessors="true" visibility="true">    

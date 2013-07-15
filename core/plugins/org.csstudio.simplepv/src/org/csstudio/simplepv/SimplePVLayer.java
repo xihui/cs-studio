@@ -25,11 +25,30 @@ public class SimplePVLayer {
 	private static final String EXTPOINT_PVFACTORY = "org.csstudio.simplepv.pvfactory"; //$NON-NLS-1$
 	
 	private static Map<String, AbstractPVFactory> factoryMap = new HashMap<String, AbstractPVFactory>(4);
+
+	/**If there is only one {@link AbstractPVFactory} implementation, return it.
+	 * If there are multiple implementations, return the default PV factory which 
+	 * is configured in the preference. 
+	 * @return Default PV Factory or null if not exist.
+	 * @throws CoreException on loading extensions error. 
+	 */	
+	public static AbstractPVFactory getPVFactory() throws CoreException{
+		String[] allPVFactoryExtensions = getAllPVFactoryExtensions();
+		if(allPVFactoryExtensions.length==1)
+			return getPVFactory(allPVFactoryExtensions[0]);
+		
+		String defaultPVFactoryID = PreferenceHelper.getDefaultPVFactoryID();
+		if(defaultPVFactoryID == null)
+			return null;
+		
+		return getPVFactory(defaultPVFactoryID);		
+	}
+
 	
 	/**Get a PV Factory from its ID.
 	 * @param pvFactoryId ID of the PV Factory extension.
-	 * @return the PV Factory.
-	 * @throws CoreException
+	 * @return the PV Factory. null if not exist.
+	 * @throws CoreException on loading extensions error.
 	 */
 	public static AbstractPVFactory getPVFactory(String pvFactoryId) throws CoreException{
 		if(!factoryMap.containsKey(pvFactoryId)){
