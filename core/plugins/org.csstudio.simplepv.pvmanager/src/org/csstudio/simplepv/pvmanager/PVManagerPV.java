@@ -55,7 +55,7 @@ public class PVManagerPV implements IPV {
 	private ExceptionHandler exceptionHandler;
 	private volatile PVReader<?> pvReader;
 	private volatile PVWriter<Object> pvWriter;
-	private int maxUpdateRate;
+	private int minUpdatePeriod;
 	private AtomicBoolean startFlag = new AtomicBoolean(false);
 	/**
 	 * If the pv is created for read only.
@@ -71,8 +71,8 @@ public class PVManagerPV implements IPV {
 	 *            name of the PV. Must not be null.
 	 * @param readOnly
 	 *            true if the client doesn't need to write to the PV.
-	 * @param maxUpdateRate
-	 *            the maximum update rate in milliseconds.
+	 * @param minUpdatePeriodInMs
+	 *            the minimum update period in millisecond. Must be large than 1ms.
 	 * @param bufferAllValues
 	 *            if all value on the PV should be buffered during two updates.
 	 * @param notificationThread
@@ -84,13 +84,15 @@ public class PVManagerPV implements IPV {
 	 *            will be notified on read or write exceptions respectively.
 	 * 
 	 */
-	public PVManagerPV(final String name, final boolean readOnly, final int maxUpdateRate,
-			final boolean bufferAllValues, final Executor notificationThread,
+	public PVManagerPV(final String name, final boolean readOnly,
+			final long minUpdatePeriodInMs,	final boolean bufferAllValues, final Executor notificationThread,
 			final org.csstudio.simplepv.ExceptionHandler exceptionHandler) {
 
 		this.name = name;
 		this.valueBuffered = bufferAllValues;
-		this.maxUpdateRate = maxUpdateRate;
+		this.minUpdatePeriod = (int) minUpdatePeriodInMs;
+	
+		
 		this.readOnly = readOnly;
 		readListenerMap = new LinkedHashMap<IPVListener, PVReaderListener<Object>>(4);
 
@@ -123,7 +125,6 @@ public class PVManagerPV implements IPV {
 
 			@Override
 			public void pvChanged(PVReaderEvent<Object> event) {
-				System.out.println("read:"+event);
 				if (event != null) {
 					if (event.isConnectionChanged())
 						listener.connectionChanged(PVManagerPV.this);
@@ -155,7 +156,6 @@ public class PVManagerPV implements IPV {
 
 				@Override
 				public void pvChanged(PVWriterEvent<Object> event) {
-					System.out.println("write:"+event);
 					if (event == null || event.isConnectionChanged())
 						listener.writePermissionChanged(PVManagerPV.this);
 					if (event != null) {
@@ -247,7 +247,7 @@ public class PVManagerPV implements IPV {
 			if (exceptionHandler != null) {
 				pvReaderConfiguration = pvReaderConfiguration.routeExceptionsTo(exceptionHandler);
 			}
-			pvReader = pvReaderConfiguration.maxRate(ofMillis(maxUpdateRate));
+			pvReader = pvReaderConfiguration.maxRate(ofMillis(minUpdatePeriod));
 		} else {
 			if (isFormula) {
 				PVReaderConfiguration<VType> pvReaderConfiguration = PVManager.read(formula(name, VType.class))
@@ -256,7 +256,7 @@ public class PVManagerPV implements IPV {
 					pvReaderConfiguration = pvReaderConfiguration
 							.routeExceptionsTo(exceptionHandler);
 				}
-				pvReader = pvReaderConfiguration.maxRate(ofMillis(maxUpdateRate));
+				pvReader = pvReaderConfiguration.maxRate(ofMillis(minUpdatePeriod));
 
 			} else {
 				PVReaderConfiguration<?> pvReaderConfiguration = PVManager.read(channel(name, VType.class, VType.class))
@@ -265,7 +265,7 @@ public class PVManagerPV implements IPV {
 					pvReaderConfiguration = pvReaderConfiguration
 							.routeExceptionsTo(exceptionHandler);
 				}
-				pvReader = pvReaderConfiguration.maxRate(ofMillis(maxUpdateRate));
+				pvReader = pvReaderConfiguration.maxRate(ofMillis(minUpdatePeriod));
 			}
 		}
 		for (PVReaderListener<Object> pvReaderListener : readListenerMap.values())

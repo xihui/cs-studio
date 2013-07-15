@@ -27,7 +27,7 @@ public abstract class AbstractPVFactory {
 	/**Create a PV.
 	 * @param name name of the PV. Must not be null.
 	 * @param readOnly true if the client doesn't need to write to the PV.
-	 * @param minUpdatePeriod the minimum update period in milliseconds, 
+	 * @param minUpdatePeriodInMs the minimum update period in milliseconds, 
 	 * which means the PV change event notification will not be faster than this period.
 	 * @param bufferAllValues if all value on the PV should be buffered during two updates.
 	 * @param notificationThread the thread on which the read and write listener will be notified. Must not be null.
@@ -38,7 +38,7 @@ public abstract class AbstractPVFactory {
 	 * @throws Exception error on creating pv.
 	 */
 	public abstract IPV createPV(final String name,
-			final boolean readOnly, final int minUpdatePeriod,
+			final boolean readOnly, final long minUpdatePeriodInMs,
 			final boolean bufferAllValues,
 			final Executor notificationThread,
 			final ExceptionHandler exceptionHandler) throws Exception;
@@ -58,7 +58,8 @@ public abstract class AbstractPVFactory {
 	public synchronized IPV createPV(final String name) throws Exception{		
 		if (SIMPLE_PV_THREAD == null)
 			SIMPLE_PV_THREAD = Executors.newSingleThreadExecutor();	
-		return createPV(name, false, 10, false, SIMPLE_PV_THREAD, null);
+		return createPV(name, false, 10,
+				false, SIMPLE_PV_THREAD, null);
 	}
 	
 	public static synchronized ExecutorService getDefaultPVNotificationThread() {
