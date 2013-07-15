@@ -11,6 +11,7 @@ package org.csstudio.simplepv.pvmanager;
 import org.csstudio.simplepv.test.BasicReadTester;
 import org.csstudio.simplepv.test.BasicReadWriteTester;
 import org.csstudio.simplepv.test.BufferingReadTester;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -20,7 +21,12 @@ import org.junit.Test;
  * 
  */
 public class PVMangerPVTest {
-
+    @BeforeClass
+    public static void setup() {
+        if (System.getProperty("os.name").contains("Mac"))
+            System.setProperty("java.awt.headless", "true");
+    }
+    
 	@Test
 	public void testSimpleRead() throws Exception {
 		BasicReadTester tester = 
