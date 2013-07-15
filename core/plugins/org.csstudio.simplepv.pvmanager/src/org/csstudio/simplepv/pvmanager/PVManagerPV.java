@@ -15,9 +15,8 @@ import static org.epics.pvmanager.formula.ExpressionLanguage.formula;
 import static org.epics.util.time.TimeDuration.ofMillis;
 
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -50,8 +49,7 @@ public class PVManagerPV implements IPV {
 
 	private String name;
 	private boolean valueBuffered;
-	private Map<IPVListener, PVReaderListener<Object>> readListenerMap;
-	private Map<IPVListener, PVWriterListener<Object>> writeListenerMap;
+	private List<IPVListener> listeners;
 	private ExceptionHandler exceptionHandler;
 	private volatile PVReader<?> pvReader;
 	private volatile PVWriter<Object> pvWriter;
@@ -94,7 +92,7 @@ public class PVManagerPV implements IPV {
 	
 		
 		this.readOnly = readOnly;
-		readListenerMap = new LinkedHashMap<IPVListener, PVReaderListener<Object>>(4);
+		listeners = new CopyOnWriteArrayList<>();		
 
 		this.notificationThread = notificationThread;
 		if (exceptionHandler != null) {
@@ -114,75 +112,33 @@ public class PVManagerPV implements IPV {
 		else
 			this.name = singleChannel;
 
-		if (!readOnly && !isFormula) {
-			writeListenerMap = new LinkedHashMap<>(4);
-		}
 	}
 
 	@Override
 	public synchronized void addListener(final IPVListener listener) {
-		final PVReaderListener<Object> pvReaderListener = new PVReaderListener<Object>() {
-
-			@Override
-			public void pvChanged(PVReaderEvent<Object> event) {
-				if (event != null) {
-					if (event.isConnectionChanged())
-						listener.connectionChanged(PVManagerPV.this);
-					if (event.isExceptionChanged())
-						listener.exceptionOccurred(PVManagerPV.this, event.getPvReader()
-								.lastException());
-				}
-				if (event == null || event.isValueChanged())
-					listener.valueChanged(PVManagerPV.this);
-			}
-		};
-		readListenerMap.put(listener, pvReaderListener);
 		if (pvReader != null) {
-			// give an update on current value in PMPV thread.
-			if (!pvReader.isClosed() && pvReader.isConnected() && !pvReader.isPaused() &&
-					pvReader.getValue() != null) {
+			// give an update on current value in notification thread.
+			if (!pvReader.isClosed() && pvReader.isConnected() && !pvReader.isPaused()
+					&& pvReader.getValue() != null) {
 				notificationThread.execute(new Runnable() {
 					@Override
 					public void run() {
-						pvReaderListener.pvChanged(null);
+						listener.valueChanged(PVManagerPV.this);
 					}
 				});
 			}
-			pvReader.addPVReaderListener(pvReaderListener);
 		}
 
-		if (!readOnly && !isFormula) {
-			final PVWriterListener<Object> pvWriterListener = new PVWriterListener<Object>() {
-
+		if (!readOnly && !isFormula && pvWriter != null && !pvWriter.isClosed()) {
+			notificationThread.execute(new Runnable() {
 				@Override
-				public void pvChanged(PVWriterEvent<Object> event) {
-					if (event == null || event.isConnectionChanged())
-						listener.writePermissionChanged(PVManagerPV.this);
-					if (event != null) {
-						if (event.isExceptionChanged())
-							listener.exceptionOccurred(PVManagerPV.this, event.getPvWriter()
-									.lastWriteException());
-						if (event.isWriteFailed() || event.isWriteSucceeded()) {
-							listener.writeFinished(PVManagerPV.this, event.isWriteSucceeded());
-						}
-					}
+				public void run() {
+					listener.writePermissionChanged(PVManagerPV.this);
 				}
-			};
+			});
 
-			writeListenerMap.put(listener, pvWriterListener);
-			if (pvWriter != null) {
-				if (!pvWriter.isClosed()) {
-					notificationThread.execute(new Runnable() {
-
-						@Override
-						public void run() {
-							pvWriterListener.pvChanged(null);
-						}
-					});
-					pvWriter.addPVWriterListener(pvWriterListener);
-				}
-			}
 		}
+		listeners.add(listener);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -241,13 +197,31 @@ public class PVManagerPV implements IPV {
 	 * updates are missed.
 	 */
 	private synchronized void internalStart() {
+		final PVReaderListener<Object> pvReaderListener = new PVReaderListener<Object>() {
+
+			@Override
+			public void pvChanged(PVReaderEvent<Object> event) {
+				for(IPVListener l : listeners){
+					if (event != null) {
+						if (event.isConnectionChanged())
+							l.connectionChanged(PVManagerPV.this);
+						if (event.isExceptionChanged())
+							l.exceptionOccurred(PVManagerPV.this, event.getPvReader()
+									.lastException());
+					}
+					if (event == null || event.isValueChanged())
+						l.valueChanged(PVManagerPV.this);
+				}				
+			}
+		};
+		
 		if (valueBuffered) {
 			PVReaderConfiguration<List<VType>> pvReaderConfiguration = PVManager.read(
 					newValuesOf(channel(name, VType.class, VType.class))).notifyOn(notificationThread);
 			if (exceptionHandler != null) {
 				pvReaderConfiguration = pvReaderConfiguration.routeExceptionsTo(exceptionHandler);
 			}
-			pvReader = pvReaderConfiguration.maxRate(ofMillis(minUpdatePeriod));
+			pvReader = pvReaderConfiguration.readListener(pvReaderListener).maxRate(ofMillis(minUpdatePeriod));
 		} else {
 			if (isFormula) {
 				PVReaderConfiguration<VType> pvReaderConfiguration = PVManager.read(formula(name, VType.class))
@@ -256,7 +230,7 @@ public class PVManagerPV implements IPV {
 					pvReaderConfiguration = pvReaderConfiguration
 							.routeExceptionsTo(exceptionHandler);
 				}
-				pvReader = pvReaderConfiguration.maxRate(ofMillis(minUpdatePeriod));
+				pvReader = pvReaderConfiguration.readListener(pvReaderListener).maxRate(ofMillis(minUpdatePeriod));
 
 			} else {
 				PVReaderConfiguration<?> pvReaderConfiguration = PVManager.read(channel(name, VType.class, VType.class))
@@ -265,25 +239,39 @@ public class PVManagerPV implements IPV {
 					pvReaderConfiguration = pvReaderConfiguration
 							.routeExceptionsTo(exceptionHandler);
 				}
-				pvReader = pvReaderConfiguration.maxRate(ofMillis(minUpdatePeriod));
+				pvReader = pvReaderConfiguration.readListener(pvReaderListener).maxRate(ofMillis(minUpdatePeriod));
 			}
 		}
-		for (PVReaderListener<Object> pvReaderListener : readListenerMap.values())
-			pvReader.addPVReaderListener(pvReaderListener);
 
 		// only create writer if it is not a formula and not created for read
 		// only
 		if (!readOnly && !isFormula) {
+			final PVWriterListener<Object> pvWriterListener = new PVWriterListener<Object>() {
+
+				@Override
+				public void pvChanged(PVWriterEvent<Object> event) {
+					for(IPVListener l : listeners){
+						if (event == null || event.isConnectionChanged())
+							l.writePermissionChanged(PVManagerPV.this);
+						if (event != null) {
+							if (event.isExceptionChanged())
+								l.exceptionOccurred(PVManagerPV.this, event.getPvWriter()
+										.lastWriteException());
+							if (event.isWriteFailed() || event.isWriteSucceeded()) {
+								l.writeFinished(PVManagerPV.this, event.isWriteSucceeded());
+							}
+						}
+					}					
+				}
+			};
 			PVWriterConfiguration<Object> writerConfiguration = PVManager.write(channel(name));
 			//TODO: PVManager could throw unnecessary exception when data source is read only
 			//See: https://github.com/ControlSystemStudio/cs-studio/issues/66
 			//Need to enable following line when above issue is fixed.
 			//		if(exceptionHandler != null)
 			//				writerConfiguration.routeExceptionsTo(exceptionHandler);
-			pvWriter = writerConfiguration.notifyOn(notificationThread).async();
-			for (PVWriterListener<Object> pvWriterListener : writeListenerMap.values()) {
-				pvWriter.addPVWriterListener(pvWriterListener);
-			}
+			pvWriter = writerConfiguration.writeListener(pvWriterListener).notifyOn(notificationThread).async();
+			
 		}
 
 	}
@@ -323,16 +311,7 @@ public class PVManagerPV implements IPV {
 
 	@Override
 	public synchronized void removeListener(IPVListener listener) {
-		if (readListenerMap.containsKey(listener)) {
-			if (pvReader != null)
-				pvReader.removePVReaderListener(readListenerMap.get(listener));
-			readListenerMap.remove(listener);
-		}
-		if (writeListenerMap != null && writeListenerMap.containsKey(listener)) {
-			if (pvWriter != null)
-				pvWriter.removePVWriterListener(writeListenerMap.get(listener));
-			writeListenerMap.remove(listener);
-		}
+		listeners.remove(listener);
 	}
 
 	@Override
