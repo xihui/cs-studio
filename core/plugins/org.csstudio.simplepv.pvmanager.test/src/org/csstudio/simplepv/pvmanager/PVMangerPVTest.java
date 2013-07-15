@@ -11,7 +11,9 @@ package org.csstudio.simplepv.pvmanager;
 import org.csstudio.simplepv.test.BasicReadTester;
 import org.csstudio.simplepv.test.BasicReadWriteTester;
 import org.csstudio.simplepv.test.BufferingReadTester;
-import org.junit.BeforeClass;
+import org.csstudio.simplepv.test.PVPerformanceTester;
+import org.csstudio.simplepv.test.PVPerformanceTester.PVNameProvider;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -21,16 +23,20 @@ import org.junit.Test;
  * 
  */
 public class PVMangerPVTest {
-    @BeforeClass
-    public static void setup() {
-        if (System.getProperty("os.name").contains("Mac"))
-            System.setProperty("java.awt.headless", "true");
-    }
-    
+
+private static final String PVMANAGER = "pvmanager";
+
+	@Before
+	public void setup() {
+		// A workaround for problem with AWT code inside PVManager on Mac OS X.
+		System.setProperty("java.awt.headless", "true");
+		PVManagerPV.setDebug(true);
+	}
+	
 	@Test
 	public void testSimpleRead() throws Exception {
 		BasicReadTester tester = 
-				new BasicReadTester("pvmanager", "sim://ramp(0,100,1,0.1)");
+				new BasicReadTester(PVMANAGER, "sim://ramp(0,100,1,0.1)");
 		tester.testAll();
 		
 	}
@@ -38,7 +44,7 @@ public class PVMangerPVTest {
 	@Test
 	public void testBufferingRead() throws Exception {
 		BufferingReadTester tester = 
-				new BufferingReadTester("pvmanager", "sim://ramp(0,80,1,0.1)");
+				new BufferingReadTester(PVMANAGER, "sim://ramp(0,80,1,0.1)");
 		tester.testAll();		
 	}
 
@@ -46,7 +52,20 @@ public class PVMangerPVTest {
 	@Test
 	public void testReadWrite() throws Exception {
 		BasicReadWriteTester tester = 
-				new BasicReadWriteTester("pvmanager", "loc://test(0)");
+				new BasicReadWriteTester(PVMANAGER, "loc://test(0)");
 		tester.testAll();		
 	}
+	
+	@Test
+	public void testPerformance() throws Exception{
+		PVPerformanceTester tester = new PVPerformanceTester(PVMANAGER, 1000, new PVNameProvider() {
+
+			@Override
+			public String getPVName(int index) {
+				return "sim://ramp(0," + index + "1, 0.1)";
+			}
+		});
+		tester.testAll();
+	}	
+	
 }

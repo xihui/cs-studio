@@ -21,6 +21,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import org.csstudio.simplepv.IPV;
@@ -61,6 +62,9 @@ public class PVManagerPV implements IPV {
 	private boolean readOnly;
 	private Executor notificationThread;
 	private boolean isFormula;
+	private static boolean debug = true;
+	private static AtomicInteger counter = new AtomicInteger(0);
+
 
 	/**
 	 * Construct a PVManger PV.
@@ -197,6 +201,9 @@ public class PVManagerPV implements IPV {
 	 * updates are missed.
 	 */
 	private synchronized void internalStart() {
+		if(debug){
+			System.out.println("Start: " + counter.incrementAndGet());			
+		}
 		final PVReaderListener<Object> pvReaderListener = new PVReaderListener<Object>() {
 
 			@Override
@@ -313,6 +320,10 @@ public class PVManagerPV implements IPV {
 	public synchronized void removeListener(IPVListener listener) {
 		listeners.remove(listener);
 	}
+	
+	public static void setDebug(boolean debug) {
+		PVManagerPV.debug = debug;
+	}
 
 	@Override
 	public void setPaused(boolean paused) {
@@ -354,8 +365,12 @@ public class PVManagerPV implements IPV {
 					NLS.bind("PV {0} has already been stopped or was not started yet.", getName()));
 			return;
 		}		
-		if (pvReader != null)
+		if (pvReader != null){
 			pvReader.close();
+			if(debug){
+				System.out.println("Stop: " + counter.decrementAndGet());			
+			}
+		}
 		if (pvWriter != null)
 			pvWriter.close();
 		pvReader = null;
