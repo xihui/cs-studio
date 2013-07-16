@@ -62,7 +62,7 @@ public class PVManagerPV implements IPV {
 	private boolean readOnly;
 	private Executor notificationThread;
 	private boolean isFormula;
-	private static boolean debug = true;
+	private static boolean debug = false;
 	private static AtomicInteger counter = new AtomicInteger(0);
 
 
@@ -120,13 +120,16 @@ public class PVManagerPV implements IPV {
 
 	@Override
 	public synchronized void addListener(final IPVListener listener) {
+		listeners.add(listener);
 		if (pvReader != null) {
 			// give an update on current value in notification thread.
-			if (!pvReader.isClosed() && pvReader.isConnected() && !pvReader.isPaused()
-					&& pvReader.getValue() != null) {
+			if (!pvReader.isClosed() && pvReader.isConnected() && !pvReader.isPaused()) {
 				notificationThread.execute(new Runnable() {
 					@Override
 					public void run() {
+						//allows later added listener also get connectionChanged
+						//and valueChanged event.
+						listener.connectionChanged(PVManagerPV.this);
 						listener.valueChanged(PVManagerPV.this);
 					}
 				});
@@ -140,9 +143,7 @@ public class PVManagerPV implements IPV {
 					listener.writePermissionChanged(PVManagerPV.this);
 				}
 			});
-
-		}
-		listeners.add(listener);
+		}		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -346,13 +347,19 @@ public class PVManagerPV implements IPV {
 	@Override
 	public void start() throws Exception {
 		if (!startFlag.getAndSet(true)) {
+			final CountDownLatch latch = new CountDownLatch(1);
+			//make sure internal start is called before return.
 			notificationThread.execute(new Runnable() {
 
 				@Override
 				public void run() {
 					internalStart();
+					latch.countDown();
 				}
 			});
+			if(!latch.await(minUpdatePeriod + 10000, TimeUnit.MILLISECONDS)){
+				throw new Exception("Failed to start pv " + getName());
+			}
 		}else
 			throw new IllegalStateException(
 					NLS.bind("PV {0} has already been started.", getName()));
