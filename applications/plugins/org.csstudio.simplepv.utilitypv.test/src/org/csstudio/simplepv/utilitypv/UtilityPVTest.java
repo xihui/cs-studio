@@ -13,8 +13,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.csstudio.simplepv.test.BasicReadTester;
 import org.csstudio.simplepv.test.BasicReadWriteTester;
-import org.csstudio.simplepv.test.PVPerformanceTester;
-import org.csstudio.simplepv.test.PVPerformanceTester.PVNameProvider;
+import org.csstudio.simplepv.test.BulkTester;
+import org.csstudio.simplepv.test.BulkTester.PVNameProvider;
 import org.junit.Test;
 
 /**
@@ -62,12 +62,12 @@ public class UtilityPVTest {
 	}
 	
 	@Test
-	public void testPerformance() throws Exception{
-		PVPerformanceTester tester = new PVPerformanceTester(UTILITY_PV, 1000, new PVNameProvider() {
+	public void testBulkOperations() throws Exception{
+		BulkTester tester = new BulkTester(UTILITY_PV, 10000, new PVNameProvider() {
 
 			@Override
 			public String getPVName(int index) {
-				return "sim://ramp(0," + index + "1, 0.1)";
+				return "sim://ramp(0," + (index +1)+ ",0.1)";
 			}
 		});		tester.testAll();
 	}

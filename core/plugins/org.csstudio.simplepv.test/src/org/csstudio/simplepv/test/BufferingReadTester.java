@@ -132,8 +132,9 @@ public class BufferingReadTester {
 		// Test pausing
 		pv.setPaused(true);
 		assertTrue(pv.isPaused());
+		Thread.sleep(1500);
 		int temp = updates.get();
-		Thread.sleep(3000);
+		Thread.sleep(2500);
 		assertEquals(temp, updates.get());
 		// Test resuming
 		pv.setPaused(false);

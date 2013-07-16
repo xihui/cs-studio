@@ -11,8 +11,8 @@ package org.csstudio.simplepv.pvmanager;
 import org.csstudio.simplepv.test.BasicReadTester;
 import org.csstudio.simplepv.test.BasicReadWriteTester;
 import org.csstudio.simplepv.test.BufferingReadTester;
-import org.csstudio.simplepv.test.PVPerformanceTester;
-import org.csstudio.simplepv.test.PVPerformanceTester.PVNameProvider;
+import org.csstudio.simplepv.test.BulkTester;
+import org.csstudio.simplepv.test.BulkTester.PVNameProvider;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,7 +30,7 @@ private static final String PVMANAGER = "pvmanager";
 	public void setup() {
 		// A workaround for problem with AWT code inside PVManager on Mac OS X.
 		System.setProperty("java.awt.headless", "true");
-		PVManagerPV.setDebug(true);
+		PVManagerPV.setDebug(false);
 	}
 	
 	@Test
@@ -57,15 +57,14 @@ private static final String PVMANAGER = "pvmanager";
 	}
 	
 	@Test
-	public void testPerformance() throws Exception{
-		PVPerformanceTester tester = new PVPerformanceTester(PVMANAGER, 1000, new PVNameProvider() {
+	public void testBulkOperations() throws Exception{
+		BulkTester tester = new BulkTester(PVMANAGER, 10000, new PVNameProvider() {
 
 			@Override
 			public String getPVName(int index) {
-				return "sim://ramp(0," + index + "1, 0.1)";
+				return "sim://ramp(0," + (index +1)+ ",0.1)";
 			}
 		});
 		tester.testAll();
-	}	
-	
+	}
 }
