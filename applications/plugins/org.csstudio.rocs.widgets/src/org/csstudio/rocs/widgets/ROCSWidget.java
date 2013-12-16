@@ -3,13 +3,18 @@ package org.csstudio.rocs.widgets;
 import gov.bnl.channelfinder.api.Channel;
 import gov.bnl.channelfinder.api.ChannelQuery.Result;
 import gov.bnl.channelfinder.api.ChannelUtil;
+import gov.bnl.channelfinder.api.Property;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
+import java.net.URL;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,18 +24,38 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.csstudio.utility.file.IFileUtil;
 import org.csstudio.openfile.DisplayUtil;
 import org.csstudio.ui.util.widgets.ErrorBar;
 import org.csstudio.utility.pvmanager.widgets.ConfigurableWidget;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -50,6 +75,11 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.osgi.framework.Bundle;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 
 public class ROCSWidget extends AbstractChannelQueryResultWidget
@@ -64,6 +94,7 @@ public class ROCSWidget extends AbstractChannelQueryResultWidget
 	private List<String> properties;
 	private List<String> propertyValues;
 	private List<String> tags;
+	private IJobManager jobMan = Job.getJobManager();
 	
 	private enum RunOpiOptions{
 		DETACHED("Detached"),EDIT("Edit"),ATTACHED("Attached");
@@ -76,7 +107,7 @@ public class ROCSWidget extends AbstractChannelQueryResultWidget
 	
 	private RunOpiOptions option = RunOpiOptions.DETACHED;
 	
-	private Map<String, HashMap<String,Channel>> cmap;
+	private Collection<XMLPropertyCollectionSet> xmlset;
 
 	public Collection<Channel> getChannels() {
 		return channels;
@@ -110,22 +141,26 @@ public class ROCSWidget extends AbstractChannelQueryResultWidget
 					ChannelUtil.getPropValues(channels, "Device"));
 			this.tags = new ArrayList<String>(
 					ChannelUtil.getAllTagNames(channels));
-			this.cmap =  new TreeMap<String, HashMap<String,Channel>>();
+			this.xmlset =  new ArrayList<XMLPropertyCollectionSet>();
 			
 			for (String propertyValue: propertyValues){
-				HashMap<String,Channel> ids = new HashMap<String,Channel>();
 				Collection<Channel> chans = filterByProperty(channels, "Device", propertyValue);
-				Set<String> unique = new HashSet<String>(ChannelUtil.getPropValues(chans, "D"));
-				for (String id : unique){
-					ids.put(id, filterByProperty(chans, "D", id).iterator().next());
+				TreeSet<XMLPropertyCollection> propTreeSet =new TreeSet<XMLPropertyCollection>();
+				for(Channel chan: chans){
+					String id = chan.getProperty("System").getValue()
+							+chan.getProperty("SubSystem").getValue()
+							+chan.getProperty("D").getValue();
+					propTreeSet.add(new XMLPropertyCollection(id,chan.getProperties()));
 				}
-				cmap.put(propertyValue, ids);
+				
+				xmlset.add(new XMLPropertyCollectionSet(propertyValue,propTreeSet));
+				
 			}
 		} else {
 			this.properties = Collections.emptyList();
 			this.tags = Collections.emptyList();
 			this.propertyValues = Collections.emptyList();
-			this.cmap = Collections.emptyMap();
+			this.xmlset = Collections.emptyList();
 		}
 		changeSupport.firePropertyChange("channels", oldChannels, channels);
 	}
@@ -165,11 +200,15 @@ public class ROCSWidget extends AbstractChannelQueryResultWidget
 
 	private void updateWidget() {
 
-		if (cmap != null) {
-			for (Map.Entry<String, HashMap<String,Channel>> entry : cmap.entrySet()) {
-
-				Template template = TemplateRegistry.getDefault().findTemplate(entry.getKey());
+		if (xmlset != null) {
+			for ( XMLPropertyCollectionSet entry : xmlset) {
 				try{
+					Job[] build = jobMan.find("ROCS Templates"); 
+					if (build.length == 1)
+						build[0].join();
+					Template template = TemplateRegistry.getDefault().findTemplate(entry.getId());
+					if(template==null)
+						throw new IllegalArgumentException("Couldn't find template "+entry.getId());
 					
 					//IFile resource = "get resource somehow";
 					//  if (resource != null) resource.refreshLocal(IResource.DEPTH_INFINITE, monitor);
@@ -177,7 +216,9 @@ public class ROCSWidget extends AbstractChannelQueryResultWidget
 					InputStream inputStream = template.getExecutorService().submit(new DisplayTemplate(entry,template)).get();
 					IFileUtil fileUtil = IFileUtil.getInstance();
 					IWorkbench workbench = PlatformUI.getWorkbench();
-					String fileName = entry.getKey()+".opi";
+					SecureRandom random = new SecureRandom();
+					String fileName = entry.getId()+"_"+new BigInteger(32, random).toString(32)+".opi";
+					
 					IFile ifile = fileUtil.createFileResource(fileName, inputStream);
 					IEditorDescriptor desc = workbench.getEditorRegistry().getDefaultEditor(ifile.getName());
 					IWorkbenchPage page = workbench.getActiveWorkbenchWindow().getActivePage();
@@ -216,31 +257,56 @@ public class ROCSWidget extends AbstractChannelQueryResultWidget
 	}
 	
 	private class DisplayTemplate implements Callable<InputStream> {
-		private Map.Entry<String, HashMap<String,Channel>> entry;
+		private XMLPropertyCollectionSet entry;
 		private Template template;
 
-		DisplayTemplate(Map.Entry<String, HashMap<String,Channel>> entry, Template template){
+		DisplayTemplate(XMLPropertyCollectionSet entry, Template template){
 			this.entry = entry;
 			this.template = template;
 		}
 
 		@Override
 		public InputStream call() throws Exception {
-			XMLDisplay xmlDisplay = new XMLDisplay();
-			xmlDisplay.addTemplate(TemplateRegistry.getDefault().findTemplate(entry.getKey()+"_header"),null);
-			Iterator itr = entry.getValue().keySet().iterator(); 
-			for (Integer i = 0; i < entry.getValue().keySet().size(); i++) {
-				Channel chan = entry.getValue().get(itr.next());
-				xmlDisplay.addTemplate(template,chan.getProperties());
+
+			JAXBContext jc = JAXBContext.newInstance(XMLPropertyCollectionSet.class, XMLPropertyCollection.class);
+			
+			Bundle bundle = Platform.getBundle("org.csstudio.rocs.widgets");
+			Path path = new Path(
+					"src/org/csstudio/rocs/widgets/stylesheet.xslt");
+			URL fileURL = FileLocator.find(bundle, path, null);
+			InputStream stylesheetFile = fileURL.openStream();
+			
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			DocumentBuilder db = factory.newDocumentBuilder();
+		    Document cachedTemplate = template.getTemplate();
+		    Document cachedHeaderTemplate = TemplateRegistry.getDefault().findTemplate(template.getName()+"_header").getTemplate();
+		    Document cachedTemplateStylesheet = db.parse(stylesheetFile);
+			
+			Document stylesheet = (Document) cachedTemplateStylesheet.cloneNode(true);
+			Element template = (Element) stylesheet.getElementsByTagName("xsl:stylesheet").item(0);
+			Node opiHeaderTemplate = cachedHeaderTemplate.getElementsByTagName("opitemplate").item(0);
+			for(int i=0; i<opiHeaderTemplate.getChildNodes().getLength();i++){
+				template.appendChild(stylesheet.importNode(opiHeaderTemplate.getChildNodes().item(i),true));
+			}
+			Node opiTemplate = cachedTemplate.getElementsByTagName("opitemplate").item(0);
+			for(int i=0; i<opiTemplate.getChildNodes().getLength();i++){
+				template.appendChild(stylesheet.importNode(opiTemplate.getChildNodes().item(i),true));
 			}
 
-			OutputStream output = new ByteArrayOutputStream();
-			JAXBContext jc = JAXBContext.newInstance(XMLDisplay.class, XMLWidget.class);
-			Marshaller marshaller = jc.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			marshaller.marshal(xmlDisplay, output);
 			
-			return new ByteArrayInputStream(((ByteArrayOutputStream) output).toByteArray());
+			TransformerFactory tf = TransformerFactory.newInstance();
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			StreamResult result = new StreamResult(os);
+			
+			Transformer transformer = tf.newTransformer(new DOMSource(stylesheet));
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+	        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+	        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+	        transformer.transform(new JAXBSource(jc,entry),result);
+			
+			return new ByteArrayInputStream(os.toByteArray());
 		}
 	}
 

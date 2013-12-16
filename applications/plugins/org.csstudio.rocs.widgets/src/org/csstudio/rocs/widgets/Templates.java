@@ -1,19 +1,36 @@
 package org.csstudio.rocs.widgets;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-
-
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.*;
+import javax.xml.bind.util.JAXBResult;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
+import org.w3c.dom.Document;
 
 
 public class Templates {
@@ -23,26 +40,40 @@ public class Templates {
 	}
 	
 	private static ExecutorService defaultExecutor = Executors.newSingleThreadExecutor(Templates.namedPool("ROCS Template"));
+	static Pattern namePattern = Pattern.compile("(.*)_header");
 	
 	
 	public static Template createFromXml(String name, InputStream input){
-	try{
-		
-		JAXBContext jc = JAXBContext.newInstance(XMLDisplay.class, XMLWidget.class);
-        Unmarshaller unmarshaller = jc.createUnmarshaller();
-        
-        XMLDisplay payload = (XMLDisplay) unmarshaller.unmarshal(input);
+		try {
 
-        TemplateDescription templateDescription = new TemplateDescription(name);
-        templateDescription.executorService = defaultExecutor;
-       
-        
-        for(XMLWidget widget : payload.widgets) {
-            //System.out.println(o.getClass());
-        	templateDescription.addWidget(widget);
-        }
-        
-		
+			TransformerFactory tf = TransformerFactory.newInstance();
+			Bundle bundle = Platform.getBundle("org.csstudio.rocs.widgets");
+			Path path = new Path("src/org/csstudio/rocs/widgets/MacroReplace.xsl");
+			URL fileURL = FileLocator.find(bundle, path, null);
+			InputStream in = fileURL.openStream();
+			StreamSource xslt = new StreamSource(in);
+			Transformer transformer = tf.newTransformer(xslt);
+
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			StreamResult result = new StreamResult(os);
+			Matcher matcher = namePattern.matcher(name);
+
+			transformer.setParameter("templateName", name);
+			transformer.transform(new StreamSource(input), result);
+
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			DocumentBuilder db = factory.newDocumentBuilder();
+			Document cachedTemplate = db.parse(new ByteArrayInputStream(os.toByteArray()));
+
+			TemplateDescription templateDescription = new TemplateDescription(name);
+			
+			templateDescription.executorService = defaultExecutor;
+
+			templateDescription.setTemplate(cachedTemplate);
+
+			
+
 			return new Template(templateDescription);
     	} catch (Exception ex) {
     		Logger.getLogger(Templates.class.getName()).log(Level.FINEST, "Couldn't create template", ex);

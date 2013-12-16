@@ -9,6 +9,13 @@ import org.csstudio.rocs.widgets.Template;
 import org.csstudio.rocs.widgets.TemplateRegistry;
 import org.csstudio.rocs.widgets.TemplateXMLFactory;
 import org.csstudio.rocs.widgets.Templates;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -23,7 +30,7 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
-	private static final TemplateXMLFactory templateXMLFactory = new TemplateXMLFactory();
+	
 	
 	/**
 	 * The constructor
@@ -36,17 +43,10 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
-		super.start(context);
 		
-		ExecutorService defaultExecutor = Executors.newSingleThreadExecutor(Templates.namedPool("ROCS Template"));
-		defaultExecutor.submit(new Runnable(){
-
-			@Override
-			public void run() {
-				for(Template template : templateXMLFactory.createTemplates()){
-					TemplateRegistry.getDefault().registerTemplate(template);
-				}
-			}});
+		super.start(context);
+		Job job = new RocsJob ("ROCS Templates");
+		job.schedule();
 
 		plugin = this;
 	}
